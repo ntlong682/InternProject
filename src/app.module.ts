@@ -1,0 +1,36 @@
+import { Module } from '@nestjs/common';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { SequelizeModule } from '@nestjs/sequelize';
+import { Role } from './models/roles.model';
+import { User } from './models/user.model';
+import { Categories } from './models/categories.model';
+import { Color } from './models/color.model';
+import { Product } from './models/product.model';
+import { ProductDetails } from './models/productdetails.model';
+import { Order } from './models/order.model';
+import { OrderDetails } from './models/orderdetails.model';
+import { Image } from './models/image.model';
+import { RoleModule } from './role/role.module';
+@Module({
+  imports: [
+    SequelizeModule.forRoot({
+      dialect: 'postgres',
+      host: 'localhost',
+      port: 5432,
+      username: 'postgres',
+      password: 'test12345',
+      database: 'OnlineShop',
+      schema: 'public',
+      autoLoadModels: true,
+      synchronize: true,
+      sync: {
+        force: true
+      },
+      models: [Role, User, Categories, Color, Product, Image, ProductDetails, Order, OrderDetails],
+    }), RoleModule
+  ],
+  controllers: [AppController],
+  providers: [AppService],
+})
+export class AppModule { }
