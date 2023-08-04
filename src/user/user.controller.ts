@@ -1,5 +1,7 @@
-import { Controller, Get } from '@nestjs/common';
+import { Body, Controller, Get, Post, Res, Response } from '@nestjs/common';
 import { UserService } from './user.service';
+import { CreateUserDTO } from 'src/dto/createUser.dto';
+import { response } from 'express';
 @Controller('user')
 export class UserController {
     constructor(private readonly userService: UserService) {}
@@ -11,6 +13,14 @@ export class UserController {
     
     @Get('list')
     async listUsers() : Promise<any> {
-        return this.userService.findAll();
+        return this.userService.findAll()
+            
+        
     }
+
+    // @Post('register')
+    // async createUser(@Body() body: CreateUserDTO) : Promise<boolean> {
+        
+    //     return this.userService.createUser(body);
+    // }
 }

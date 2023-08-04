@@ -13,6 +13,7 @@ import { OrderDetails } from './models/orderdetails.model';
 import { Image } from './models/image.model';
 import { RoleModule } from './role/role.module';
 import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
 @Module({
   imports: [
     SequelizeModule.forRoot({
@@ -24,12 +25,12 @@ import { UserModule } from './user/user.module';
       database: 'OnlineShop',
       schema: 'public',
       autoLoadModels: true,
-      synchronize: true,
+      synchronize: false,
       sync: {
         alter: true
       },
       models: [Role, User, Categories, Color, Product, Image, ProductDetails, Order, OrderDetails],
-    }), RoleModule, UserModule
+    }), RoleModule, UserModule, AuthModule
   ],
   controllers: [AppController],
   providers: [AppService],
