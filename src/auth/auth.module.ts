@@ -9,7 +9,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from "./constants";
 import { LocalStrategy } from "./auth.strategy";
-import { JwtStrategy } from "./jwt.strategy";
+// import { JwtStrategy } from "./jwt.strategy";
 
 @Module({
     imports:[SequelizeModule.forFeature([User]),
