@@ -1,4 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/sequelize';
 import { Sequelize } from 'sequelize-typescript';
 import { CreateUserDTO } from 'src/dto/createUser.dto';
@@ -11,7 +12,8 @@ export class AuthService {
         @InjectModel(User)
         private userModel: typeof User,
         private sequelize: Sequelize,
-        private readonly userService: UserService
+        private readonly userService: UserService,
+        private jwtService: JwtService
     ) { }
 
     async register(registerUser: CreateUserDTO): Promise<boolean> {
@@ -40,12 +42,19 @@ export class AuthService {
         return flag;
     }
 
-    async login(loginUser: LoginUserDTO) : Promise<any> {
+    async validateLogin(loginUser: LoginUserDTO) : Promise<any> {
         let loginAcc = await (this.userService.findOneByLoginData(loginUser.username, loginUser.password));
         if(loginAcc != null) {
-            return loginAcc;
+            return this.login(loginUser);
         } else {
             throw new UnauthorizedException();
+        }
+    }
+
+    async login(user: any) {
+        const payload = {username: user.userName, sub: user.id};
+        return {
+            access_token: this.jwtService.sign(payload),
         }
     }
 }
