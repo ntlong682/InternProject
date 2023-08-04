@@ -11,25 +11,25 @@ export class RoleService{
         private sequelize: Sequelize
     ){}
 
-    async createRole() : Promise<String> {
-        try {
-            await this.sequelize.transaction(async t => {
-                const transactionHost = {transaction: t};
-                await this.roleModel.create(
-                    {roleName: 'Admin'}, transactionHost,
-                );
-                await this.roleModel.create(
-                    {roleName: 'Customer'}, transactionHost,
-                )
+    // async createRole() : Promise<String> {
+    //     try {
+    //         await this.sequelize.transaction(async t => {
+    //             const transactionHost = {transaction: t};
+    //             await this.roleModel.create(
+    //                 {roleName: 'Admin'}, transactionHost,
+    //             );
+    //             await this.roleModel.create(
+    //                 {roleName: 'Customer'}, transactionHost,
+    //             )
             
-            });
-            return 'Create role successfully!';
+    //         });
+    //         return 'Create role successfully!';
             
-        }
-         catch (error) {
-            return 'Create role failed!';
-        }
-    }
+    //     }
+    //      catch (error) {
+    //         return 'Create role failed!';
+    //     }
+    // }
 
     async findAll(): Promise<Role[]> {
         return this.roleModel.findAll();

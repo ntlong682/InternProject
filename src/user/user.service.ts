@@ -10,17 +10,24 @@ export class UserService{
     private sequelize: Sequelize
     ){}
 
-    async createAdmin() : Promise<any> {
-        try {
-            await this.sequelize.transaction(async t => {
-                const transactionHost = {transaction: t};
 
-                // await this.userModel.create({
-                //     userName: 'admin', password: '123456'
-                // });
-            });
-        } catch (error) {
-            
-        }
+    // async createAdmin() : Promise<String> {
+    //     try {
+    //         await this.sequelize.transaction(async t => {
+    //             const transactionHost = {transaction: t};
+
+    //             await this.userModel.create({
+    //                 userName: 'admin', password: '123456', role_id: 1
+    //             }, transactionHost);
+    //         });
+
+    //         return "Add admin account successful";
+    //     } catch (error) {
+    //         return "Add admin account failed";
+    //     }
+    // }
+
+    async findAll() : Promise<any> {
+        return this.userModel.findAll();
     }
 }
