@@ -3,6 +3,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Sequelize } from 'sequelize-typescript';
 import { User } from 'src/models/user.model';
+import * as bcrypt from 'bcrypt';
+import { use } from 'passport';
+
 @Injectable()
 export class UserService{
     constructor(
@@ -15,11 +18,11 @@ export class UserService{
     // async createAdmin() : Promise<String> {
     //     try {
     //         await this.sequelize.transaction(async t => {
-    //             const transactionHost = {transaction: t};
-
+    //             const salt = 10;
+    //             const hash = await bcrypt.hash("123456", salt);
     //             await this.userModel.create({
-    //                 userName: 'admin', password: '123456', role_id: 1
-    //             }, transactionHost);
+    //                 userName: 'admin', password: hash, role_id: 1
+    //             });
     //         });
 
     //         return "Add admin account successful";
@@ -49,11 +52,16 @@ export class UserService{
     }
 
     async findOneByLoginData(username: string, password: string) : Promise<User> {
-        return this.userModel.findOne({
+        const user = await this.userModel.findOne({
             where: {
                 userName: username,
-                password: password,
             }
         })
+        const isMatch = await bcrypt.compare(password, user.password);
+        if(isMatch == true) {
+            return user;
+        } else{
+            return null;
+        }
     }
 }

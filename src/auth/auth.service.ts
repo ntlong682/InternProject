@@ -6,6 +6,8 @@ import { CreateUserDTO } from 'src/dto/createUser.dto';
 import { LoginUserDTO } from 'src/dto/loginuser.dto';
 import { User } from 'src/models/user.model';
 import { UserService } from 'src/user/user.service';
+import * as bcrypt from 'bcrypt';
+
 @Injectable()
 export class AuthService {
     constructor(
@@ -16,19 +18,22 @@ export class AuthService {
         private jwtService: JwtService
     ) { }
 
-    async register(registerUser: CreateUserDTO): Promise<boolean> {
+    async register(registerUser: CreateUserDTO): Promise<any> {
         let existAcc = await (this.userService.findOneByUsername(registerUser.username));
         console.log(existAcc);
         let flag = false;
         if (existAcc == null) {
             if (registerUser.password == registerUser.repassword) {
-
+                    const salt = 10;
+                    const hash = await bcrypt.hash(registerUser.password, salt);
                     await this.userModel.create({
                         userName: registerUser.username,
-                        password: registerUser.password,
+                        password: hash,
                         role_id: 2
                     });
-
+                    
+                    // return this.userService.findOneByUsername(registerUser.username);
+                    
                 
                 flag = true;
             } else {
