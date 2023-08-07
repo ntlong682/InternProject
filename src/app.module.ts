@@ -15,6 +15,7 @@ import { RoleModule } from './role/role.module';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { CategoriesModule } from './categories/categories.module';
+import { ColorModule } from './color/color.module';
 @Module({
   imports: [
     SequelizeModule.forRoot({
@@ -31,7 +32,7 @@ import { CategoriesModule } from './categories/categories.module';
         alter: true
       },
       models: [Role, User, Categories, Color, Product, Image, ProductDetails, Order, OrderDetails],
-    }), RoleModule, UserModule, AuthModule, CategoriesModule
+    }), RoleModule, UserModule, AuthModule, CategoriesModule, ColorModule
   ],
   controllers: [AppController],
   providers: [AppService],
