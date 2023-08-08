@@ -53,13 +53,13 @@ export class ProductController {
         }
 
         if (flag == true) {
-            const productResult = this.productService.createProduct(body.name, body.price, body.oldprice, body.categoryId);
+            const productResult = await this.productService.createProduct(body.name, body.price, body.oldprice, body.categoryId);
             if (productResult != null) {
-                const saveProductImgSuccess = this.productService.saveProductsImage(files, (await productResult).id);
+                const saveProductImgSuccess = await this.productService.saveProductsImage(files, productResult.id);
                 if(saveProductImgSuccess) {
 
-                    const saveProductDetailsSuccess = this.productService.createProductDetails(body.cpu, body.screen,
-                        body.ram, body.rom, body.weight, body.colorId, body.quantity, (await productResult).id);
+                    const saveProductDetailsSuccess = await this.productService.createProductDetails(body.cpu, body.screen,
+                        body.ram, body.rom, body.weight, body.colorId, body.quantity, productResult.id);
                     if(saveProductDetailsSuccess) {
                         return {
                             status : true.valueOf()

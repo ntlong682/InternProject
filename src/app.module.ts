@@ -22,7 +22,8 @@ import { MulterModule } from '@nestjs/platform-express';
   imports: [
     SequelizeModule.forRoot({
       dialect: 'postgres',
-      host: 'localhost',
+      // host: 'localhost',
+      host: '221.132.29.226',
       port: 5432,
       username: 'postgres',
       password: 'test12345',

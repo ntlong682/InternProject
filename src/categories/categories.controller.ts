@@ -5,10 +5,10 @@ import { Categories } from 'src/models/categories.model';
 export class CategoriesController {
     constructor(private readonly categoriesService: CategoriesService){}
 
-    // @Get('addCategory')
-    // async addCategory() : Promise<any> {
-    //     return this.categoriesService.addCategory();
-    // }
+    @Get('addCategory')
+    async addCategory() : Promise<any> {
+        return this.categoriesService.addCategory();
+    }
 
     @Get('list')
     async list(): Promise<Categories[]> {

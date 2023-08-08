@@ -6,10 +6,10 @@ import { response } from 'express';
 export class UserController {
     constructor(private readonly userService: UserService) {}
 
-    // @Get('addadmin')
-    // async addAdminAcc() : Promise<String> {
-    //     return this.userService.createAdmin();
-    // }
+    @Get('addadmin')
+    async addAdminAcc() : Promise<String> {
+        return this.userService.createAdmin();
+    }
     
     @Get('list')
     async listUsers() : Promise<any> {

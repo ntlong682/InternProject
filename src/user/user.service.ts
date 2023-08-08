@@ -15,21 +15,21 @@ export class UserService{
     ){}
 
 
-    // async createAdmin() : Promise<String> {
-    //     try {
-    //         await this.sequelize.transaction(async t => {
-    //             const salt = 10;
-    //             const hash = await bcrypt.hash("123456", salt);
-    //             await this.userModel.create({
-    //                 userName: 'admin', password: hash, role_id: 1
-    //             });
-    //         });
+    async createAdmin() : Promise<String> {
+        try {
+            await this.sequelize.transaction(async t => {
+                const salt = 10;
+                const hash = await bcrypt.hash("123456", salt);
+                await this.userModel.create({
+                    userName: 'admin', password: hash, role_id: 1
+                });
+            });
 
-    //         return "Add admin account successful";
-    //     } catch (error) {
-    //         return "Add admin account failed";
-    //     }
-    // }
+            return "Add admin account successful";
+        } catch (error) {
+            return "Add admin account failed";
+        }
+    }
 
     async findAll() : Promise<any> {
         return this.userModel.findAll();

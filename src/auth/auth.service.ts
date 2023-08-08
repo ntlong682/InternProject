@@ -50,16 +50,17 @@ export class AuthService {
     async validateLogin(loginUser: LoginUserDTO) : Promise<any> {
         let loginAcc = await (this.userService.findOneByLoginData(loginUser.username, loginUser.password));
         if(loginAcc != null) {
-            return this.login(loginUser);
+            return this.login(loginAcc);
         } else {
             throw new UnauthorizedException();
         }
     }
 
     async login(user: any) {
-        const payload = {username: user.userName, sub: user.id};
+        const payload = {username: user.userName, role: user.role_id, sub: user.id};
         return {
             access_token: this.jwtService.sign(payload),
+            username: user.userName
         }
     }
 }

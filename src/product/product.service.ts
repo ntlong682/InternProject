@@ -46,18 +46,18 @@ export class ProductService {
     }
 
     async createProductDetails(cpuName: string, screen: number, ram: number, rom: number, weight: number,
-        colorId: number, quantity: number, productId: number) : Promise<boolean> {
+        colorId: number, quantity: number, product_id: number) : Promise<boolean> {
         try {
             const result = await this.productDetailsModel.create({
                 cpuName: cpuName,
+                product_id: product_id,
                 screen: screen,
                 ram: ram,
                 rom: rom,
                 weight: weight,
                 color_id: colorId,
                 quantity: quantity,
-                product_id: productId
-            })
+            });
             console.log(result);
             return true;
         } catch (error) {
