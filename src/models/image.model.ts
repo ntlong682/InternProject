@@ -8,6 +8,9 @@ export class Image extends Model {
     id: number;
 
     @Column
+    imgName: string;
+
+    @Column
     imgUrl: string;
 
     @ForeignKey(() => Product)
