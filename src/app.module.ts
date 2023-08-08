@@ -16,6 +16,8 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { CategoriesModule } from './categories/categories.module';
 import { ColorModule } from './color/color.module';
+import { ProductModule } from './product/product.module';
+import { MulterModule } from '@nestjs/platform-express';
 @Module({
   imports: [
     SequelizeModule.forRoot({
@@ -32,7 +34,10 @@ import { ColorModule } from './color/color.module';
         alter: true
       },
       models: [Role, User, Categories, Color, Product, Image, ProductDetails, Order, OrderDetails],
-    }), RoleModule, UserModule, AuthModule, CategoriesModule, ColorModule
+    }),
+    MulterModule.register({
+      dest: './files',
+    }), RoleModule, UserModule, AuthModule, CategoriesModule, ColorModule, ProductModule
   ],
   controllers: [AppController],
   providers: [AppService],

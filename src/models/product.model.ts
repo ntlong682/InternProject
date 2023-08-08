@@ -1,6 +1,7 @@
-import { AutoIncrement, BelongsTo, Column, ForeignKey, HasMany, Model, PrimaryKey, Table } from "sequelize-typescript";
+import { AutoIncrement, BelongsTo, Column, ForeignKey, HasMany, HasOne, Model, PrimaryKey, Table } from "sequelize-typescript";
 import { Categories } from "./categories.model";
 import { Image } from "./image.model";
+import { ProductDetails } from "./productdetails.model";
 
 @Table
 export class Product extends Model {
@@ -28,4 +29,7 @@ export class Product extends Model {
 
     @HasMany(() => Image)
     imgList: Image[];
+
+    @HasOne(() => ProductDetails)
+    productDetails: ProductDetails[];
 }

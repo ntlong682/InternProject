@@ -1,5 +1,6 @@
 import { AutoIncrement, BelongsTo, Column, ForeignKey, Model, PrimaryKey, Table } from "sequelize-typescript";
 import { Color } from "./color.model";
+import { Product } from "./product.model";
 
 @Table
 export class ProductDetails extends Model {
@@ -8,6 +9,13 @@ export class ProductDetails extends Model {
     @AutoIncrement
     @Column
     id: number;
+
+    @ForeignKey(() => Product)
+    @Column
+    product_id: number
+
+    @BelongsTo(() => Product)
+    product: Product
 
     @Column
     cpuName: string;

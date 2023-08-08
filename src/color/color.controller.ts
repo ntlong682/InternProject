@@ -6,11 +6,13 @@ import { Color } from 'src/models/color.model';
 export class ColorController{
     constructor(private readonly colorService: ColorService){}
 
+    // http://localhost:3000/color/list
     @Get('list')
     async listColor() : Promise<Color[]> {
         return this.colorService.findAll();
     }
 
+    // http://localhost:3000/color/create
     @Post('create')
     async createColor(@Query('color') color:string): Promise<string> {
         return this.colorService.createColor(color);

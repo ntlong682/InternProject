@@ -44,4 +44,14 @@ export class CategoriesService {
     async findAll() : Promise<Categories[]> {
         return this.categoryModel.findAll();
     }
+
+    async checkCategoryId(id : number) : Promise<boolean> {
+        const category = this.categoryModel.findOne({
+            where: {
+                id : id,
+            }
+        })
+
+        return category != null;
+    }
 }
