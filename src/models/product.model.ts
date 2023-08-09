@@ -1,4 +1,4 @@
-import { AutoIncrement, BelongsTo, Column, ForeignKey, HasMany, HasOne, Model, PrimaryKey, Table } from "sequelize-typescript";
+import { AutoIncrement, BelongsTo, Column, DataType, ForeignKey, HasMany, HasOne, Model, PrimaryKey, Table } from "sequelize-typescript";
 import { Categories } from "./categories.model";
 import { Image } from "./image.model";
 import { ProductDetails } from "./productdetails.model";
@@ -14,10 +14,10 @@ export class Product extends Model {
     @Column
     name: string;
 
-    @Column
+    @Column(DataType.DOUBLE)
     price: number;
 
-    @Column
+    @Column(DataType.DOUBLE)
     oldPrice: number;
 
     @ForeignKey(() => Categories)
@@ -32,4 +32,6 @@ export class Product extends Model {
 
     @HasOne(() => ProductDetails)
     productDetails: ProductDetails[];
+    static Image: any;
+
 }

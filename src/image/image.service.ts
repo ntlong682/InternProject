@@ -35,4 +35,13 @@ export class ImageService {
             return false;
         }
     }
+
+    async findCoverImageByProductId(productId: number) : Promise<Image> {
+        return await this.imageModel.findOne({
+            where:{
+                product_id: productId,
+                imgName: 'Cover%'
+            }
+        });
+    }
 }

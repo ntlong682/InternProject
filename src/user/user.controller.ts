@@ -6,6 +6,7 @@ import { response } from 'express';
 export class UserController {
     constructor(private readonly userService: UserService) {}
 
+    //run 1 time
     @Get('addadmin')
     async addAdminAcc() : Promise<String> {
         return this.userService.createAdmin();

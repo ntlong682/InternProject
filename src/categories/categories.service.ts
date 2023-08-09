@@ -12,6 +12,8 @@ export class CategoriesService {
         private sequelize: Sequelize
     ) {}
 
+
+    //Run 1 time
     async addCategory() : Promise<string> {
         try {
             await this.sequelize.transaction(async t => {

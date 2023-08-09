@@ -5,6 +5,7 @@ import { Categories } from 'src/models/categories.model';
 export class CategoriesController {
     constructor(private readonly categoriesService: CategoriesService){}
 
+    //run 1 time
     @Get('addCategory')
     async addCategory() : Promise<any> {
         return this.categoriesService.addCategory();

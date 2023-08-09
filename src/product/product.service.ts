@@ -1,3 +1,4 @@
+import { Image } from 'src/models/image.model';
 import { Injectable, UseInterceptors, UploadedFiles } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import { Sequelize } from "sequelize-typescript";
@@ -8,6 +9,9 @@ import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { diskStorage } from "multer";
 import { ImageService } from "src/image/image.service";
 import { ProductDetails } from "src/models/productdetails.model";
+import { ListProductAdminDTO } from "src/dto/listProductAdmin.dto";
+import { Categories } from "src/models/categories.model";
+import { Op } from 'sequelize';
 
 @Injectable()
 export class ProductService {
@@ -46,7 +50,7 @@ export class ProductService {
     }
 
     async createProductDetails(cpuName: string, screen: number, ram: number, rom: number, weight: number,
-        colorId: number, quantity: number, product_id: number) : Promise<boolean> {
+        colorId: number, quantity: number, product_id: number): Promise<boolean> {
         try {
             const result = await this.productDetailsModel.create({
                 cpuName: cpuName,
@@ -61,6 +65,7 @@ export class ProductService {
             console.log(result);
             return true;
         } catch (error) {
+            console.log(error);
             return false;
         }
     }
@@ -87,6 +92,67 @@ export class ProductService {
         if (flag == true) {
             return true;
         } else {
+            return false;
+        }
+    }
+
+    async findAllProduct(): Promise<Product[]> {
+        const products = await this.productModel.findAll({
+            include: [
+                {
+                    model: Categories
+                },
+                {
+                    model: Image,
+                    where: {
+                        imgName: {
+                            [Op.startsWith]: 'Cover'
+                        }
+                    }
+                }
+            ]
+        });
+        if (products.length != 0) {
+            console.log(products); //test
+            return products;
+        } else {
+            return null;
+        }
+    }
+
+    async getListProductForAdmin(): Promise<ListProductAdminDTO[]> {
+        const products = await this.findAllProduct();
+        if (products != null) {
+            let result: ListProductAdminDTO[] = [];
+            products.forEach(p => {
+                // const coverImg = this.imageService.findCoverImageByProductId(p.id);
+                // const coverImgPath = (await coverImg).imgUrl;//here
+                const newProductDTO: ListProductAdminDTO = {
+                    id: p.id,
+                    productName: p.name,
+                    price: p.price,
+                    oldPrice: p.oldPrice,
+                    categoryName: p.category.categoryName,
+                    coverImgPath: p.imgList[0].imgUrl
+                }
+                result.push(newProductDTO);
+            });
+
+            return result;
+        }
+
+        return null;
+    }
+
+    async deleteProduct(id: number) : Promise<boolean> {
+        try {
+            // await this.productModel.destroy({
+            //     where: {
+            //         id: id
+            //     }
+            // }) Can check productId trong order/order detail
+            return true;
+        } catch (error) {
             return false;
         }
     }

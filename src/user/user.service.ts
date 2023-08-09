@@ -15,6 +15,7 @@ export class UserService{
     ){}
 
 
+    //run 1 time
     async createAdmin() : Promise<String> {
         try {
             await this.sequelize.transaction(async t => {

@@ -10,9 +10,11 @@ import { Color } from "src/models/color.model";
 import { ImageService } from "src/image/image.service";
 import { Image } from "src/models/image.model";
 import { ProductDetails } from "src/models/productdetails.model";
+import { AuthGuard } from "src/auth/auth.guard";
+import { JwtService } from "@nestjs/jwt";
 @Module({
     imports: [SequelizeModule.forFeature([Product, ProductDetails, Categories, Color, Image])],
-    providers: [ProductService, CategoriesService, ColorService, ImageService],
+    providers: [ProductService, CategoriesService, ColorService, ImageService, AuthGuard, JwtService],
     controllers: [ProductController],
 })
 export class ProductModule{}
