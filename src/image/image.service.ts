@@ -10,6 +10,15 @@ export class ImageService {
         private sequelize: Sequelize
     ) { }
 
+    async findAllImgByProductId(id: number) : Promise<Image[]>{
+        const result = this.imageModel.findAll({
+            where: {
+                product_id: id
+            }
+        });
+        return result
+    }
+
     async addImage(imgName: string, imgUrl: string, productId: number): Promise<boolean> {
         try {
             await this.imageModel.create({

@@ -7,16 +7,16 @@ import * as bcrypt from 'bcrypt';
 import { use } from 'passport';
 
 @Injectable()
-export class UserService{
+export class UserService {
     constructor(
-    @InjectModel(User)
-    private userModel: typeof User, 
-    private sequelize: Sequelize
-    ){}
+        @InjectModel(User)
+        private userModel: typeof User,
+        private sequelize: Sequelize
+    ) { }
 
 
     //run 1 time
-    async createAdmin() : Promise<String> {
+    async createAdmin(): Promise<String> {
         try {
             await this.sequelize.transaction(async t => {
                 const salt = 10;
@@ -32,7 +32,7 @@ export class UserService{
         }
     }
 
-    async findAll() : Promise<any> {
+    async findAll(): Promise<any> {
         return this.userModel.findAll();
     }
 
@@ -40,29 +40,34 @@ export class UserService{
     //     var usernameExist = this.userModel.findOne({where: {
     //         createUserDTO
     //     }});
-        
+
     //     return false;
     // }
 
-    async findOneByUsername(username: string) : Promise<User> {
+    async findOneByUsername(username: string): Promise<User> {
         return this.userModel.findOne({
             where: {
-                userName : username,
+                userName: username,
             }
         })
     }
 
-    async findOneByLoginData(username: string, password: string) : Promise<User> {
+    async findOneByLoginData(username: string, password: string): Promise<User> {
         const user = await this.userModel.findOne({
             where: {
                 userName: username,
             }
         })
-        const isMatch = await bcrypt.compare(password, user.password);
-        if(isMatch == true) {
-            return user;
-        } else{
+        if (user != null) {
+            const isMatch = await bcrypt.compare(password, user.password);
+            if (isMatch == true) {
+                return user;
+            } else {
+                return null;
+            }
+        } else {
             return null;
         }
+
     }
 }

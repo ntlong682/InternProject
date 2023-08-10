@@ -12,6 +12,7 @@ import { Categories } from "src/models/categories.model";
 import { Op } from 'sequelize';
 import { OrderService } from 'src/order/order.service';
 import { UpdateProductDTO } from 'src/dto/updateProduct.dto';
+import * as fs from 'node:fs';
 
 @Injectable()
 export class ProductService {
@@ -73,7 +74,7 @@ export class ProductService {
 
 
     async saveProductsImage(@UploadedFiles() files: { coverImage?: Express.Multer.File[], Images?: Express.Multer.File[] }, productId: number): Promise<boolean> {
-        console.log(files);
+        // console.log(files);
         let flag = true;
         files.coverImage.forEach(file => {
             const imgPath = file.path;
@@ -95,6 +96,17 @@ export class ProductService {
         } else {
             return false;
         }
+    }
+
+    async deleteLocalProductImageError(@UploadedFiles() files: { coverImage?: Express.Multer.File[], Images?: Express.Multer.File[] }) {
+        files.coverImage.forEach(file => {
+            
+        });
+    }
+
+    async deleteLocalFile(filePath: string) {
+        const fs = require("node:fs");
+        
     }
 
     async findAllProduct(): Promise<Product[]> {
@@ -238,6 +250,9 @@ export class ProductService {
             const checkExist = this.orderService.checkProductExistInOrder(id);
             if (await checkExist == true) {
                 //xoa img
+                //Xoa img khoi local file
+                //code here
+
                 await this.imageService.deleteImageByProductId(id);
                 //xoa product details
                 await this.productDetailsModel.destroy({
