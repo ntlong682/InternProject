@@ -28,7 +28,7 @@ export class ColorService {
 
     async checkColorExist(colorId: number): Promise<boolean> {
         try {
-            const result = this.colorModel.findOne({
+            const result = await this.colorModel.findOne({
                 where: {
                     id : colorId
                 }

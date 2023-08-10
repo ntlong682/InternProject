@@ -5,13 +5,13 @@ import { Sequelize } from "sequelize-typescript";
 import { CategoriesService } from "src/categories/categories.service";
 import { ColorService } from "src/color/color.service";
 import { Product } from "src/models/product.model";
-import { FileFieldsInterceptor } from "@nestjs/platform-express";
-import { diskStorage } from "multer";
 import { ImageService } from "src/image/image.service";
 import { ProductDetails } from "src/models/productdetails.model";
 import { ListProductAdminDTO } from "src/dto/listProductAdmin.dto";
 import { Categories } from "src/models/categories.model";
 import { Op } from 'sequelize';
+import { OrderService } from 'src/order/order.service';
+import { UpdateProductDTO } from 'src/dto/updateProduct.dto';
 
 @Injectable()
 export class ProductService {
@@ -23,7 +23,8 @@ export class ProductService {
         private sequelize: Sequelize,
         private readonly categoriesService: CategoriesService,
         private readonly colorService: ColorService,
-        private readonly imageService: ImageService
+        private readonly imageService: ImageService,
+        private readonly orderService: OrderService
     ) { }
 
     async getCategoriesAndColor(): Promise<any> {
@@ -120,6 +121,24 @@ export class ProductService {
         }
     }
 
+    async findProductById(productId: number): Promise<Product> {
+        const product = await this.productModel.findOne({
+            include: [
+                {
+                    model: Categories
+                },
+                {
+                    model: Image
+                }
+            ], where: {
+                id: productId
+            }
+        })
+        // console.log(product);
+
+        return product;
+    }
+
     async getListProductForAdmin(): Promise<ListProductAdminDTO[]> {
         const products = await this.findAllProduct();
         if (products != null) {
@@ -144,16 +163,83 @@ export class ProductService {
         return null;
     }
 
-    async deleteProduct(id: number) : Promise<boolean> {
+    async getSelectedProduct(id: number): Promise<UpdateProductDTO> {
+        const result = await this.findProductById(id);
+        if (result != null) {
+            let coverImgUrl: string;
+            let imgUrlList: string[] = [];
+            let count = 0;
+            do {
+                let tempImg = result.imgList[count].imgName;
+                if (tempImg.startsWith('Cover') == true) {
+                    coverImgUrl = result.imgList[count].imgUrl;
+                    break;
+                } 
+                count++;
+
+            } while (count < result.imgList.length);
+
+            count = 0;
+            do {
+                let tempImg = result.imgList[count].imgName;
+                if (tempImg.startsWith('Cover') == false) {
+                    imgUrlList.push(result.imgList[count].imgUrl);
+                }
+                count++;
+
+            } while (count < result.imgList.length);
+
+            console.log(result);
+
+            const selectedProduct: UpdateProductDTO = {
+                id: result.id,
+                name: result.name,
+                price: result.price,
+                oldprice: result.oldPrice,
+                categoryId: result.category_id,
+                cpu: result.productDetails.cpuName,
+                ram: result.productDetails.ram,
+                rom: result.productDetails.rom,
+                screen: result.productDetails.screen,
+                weight: result.productDetails.color_id,
+                colorId: result.productDetails.color_id,
+                quantity: result.productDetails.quantity,
+                coverImg: coverImgUrl,
+                imgList: imgUrlList
+            };
+            return selectedProduct;
+        }
+
+        return null;
+    }
+
+    async deleteProduct(id: number): Promise<boolean> {
         try {
-            // await this.productModel.destroy({
-            //     where: {
-            //         id: id
-            //     }
-            // }) Can check productId trong order/order detail
-            return true;
+            const checkExist = this.orderService.checkProductExistInOrder(id);
+            if (await checkExist == true) {
+                //xoa img
+                await this.imageService.deleteImageByProductId(id);
+                //xoa product details
+                await this.productDetailsModel.destroy({
+                    where: {
+                        product_id: id
+                    }
+                })
+                // Xoa product
+                await this.productModel.destroy({
+                    where: {
+                        id: id
+                    }
+                })
+                return true;
+            } else {
+                return false;
+            }
+            //Can check productId trong order/order detail
         } catch (error) {
             return false;
         }
     }
+
+
 }

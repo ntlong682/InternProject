@@ -8,14 +8,14 @@ export class ImageService {
         @InjectModel(Image)
         private imageModel: typeof Image,
         private sequelize: Sequelize
-    ){}
+    ) { }
 
-    async addImage(imgName : string, imgUrl : string, productId : number) : Promise<boolean> {
+    async addImage(imgName: string, imgUrl: string, productId: number): Promise<boolean> {
         try {
             await this.imageModel.create({
-                imgUrl : imgUrl,
-                product_id : productId,
-                imgName : imgName
+                imgUrl: imgUrl,
+                product_id: productId,
+                imgName: imgName
             });
             return true;
         } catch (error) {
@@ -23,25 +23,42 @@ export class ImageService {
         }
     }
 
-    async checkImageNotExist(imageName : string) : Promise<boolean> {
+    async checkImageNotExist(imageName: string): Promise<boolean> {
         try {
-            const result = this.imageModel.findOne({
-                where : {
-                    imgName : imageName
+            const result = await this.imageModel.findOne({
+                where: {
+                    imgName: imageName
                 }
             })
-            return result == null;
+            if(result == null) {
+                return true;
+            } else {
+                return false;
+            }
         } catch (error) {
             return false;
         }
     }
 
-    async findCoverImageByProductId(productId: number) : Promise<Image> {
+    async findCoverImageByProductId(productId: number): Promise<Image> {
         return await this.imageModel.findOne({
-            where:{
+            where: {
                 product_id: productId,
                 imgName: 'Cover%'
             }
         });
+    }
+
+    async deleteImageByProductId(productId: number) {
+        try {
+            await this.imageModel.destroy({
+                where: {
+                    product_id: productId
+                }
+            })
+        } catch (error) {
+            throw error;
+        }
+
     }
 }

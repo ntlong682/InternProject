@@ -1,4 +1,4 @@
-import { Controller, Get, Post, UploadedFiles, UseInterceptors, Query, Body, UseGuards } from "@nestjs/common";
+import { Controller, Get, Post, UploadedFiles, UseInterceptors, Query, Body, UseGuards, Delete } from "@nestjs/common";
 import { ProductService } from "./product.service";
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { diskStorage } from "multer";
@@ -48,19 +48,21 @@ export class ProductController {
         // console.log(body);
         let flag = true;
 
-        files.coverImage.forEach(file => {
-            if (!this.imageService.checkImageNotExist(`Cover${file.originalname}`)) {
-                flag = false;
-            }
-        });
+        // files.coverImage.forEach(async file => {
+        //     if ( await this.imageService.checkImageNotExist(`Cover${file.originalname}`) != true) {
+        //         flag = false;
+        //     }
+        // });
 
-        files.Images.forEach(file => {
-            if (!this.imageService.checkImageNotExist(file.originalname)) {
-                flag = false;
-            }
-        });
+        // files.Images.forEach(async file => {
+        //     if (await this.imageService.checkImageNotExist(file.originalname) != true) {
+        //         flag = false;
+        //     }
+        // });
 
-        if (!this.colorService.checkColorExist) {
+        //Da gen path nen ko bi trung nua
+
+        if (await this.colorService.checkColorExist(body.colorId) == false) {
             flag = false;
         }
 
@@ -109,22 +111,59 @@ export class ProductController {
     }
 
     @UseGuards(AuthGuard)
-    @Get('delete')
-    async deleteProduct(@Query('id') id: number): Promise<any> {
-        const result = this.productService.deleteProduct(id);
-        if(result) {
-            return {
-                status: true.valueOf(),
-                message: 'Xóa sản phẩm thành công'
+    @Delete('delete')
+    async deleteProduct(@Query('id') id: string): Promise<{ status, message }> {
+        try {
+            const productId: number = parseInt(id);
+
+            const productExist = await this.productService.findProductById(productId);
+            if (productExist != null) {
+                const result = this.productService.deleteProduct(productId);
+                if (await result == true) {
+                    return {
+                        status: true.valueOf(),
+                        message: 'Xóa sản phẩm thành công'
+                    }
+                } else {
+                    return {
+                        status: false.valueOf(),
+                        message: 'Xóa sản phẩm thất bại'
+                    }
+                }
+            } else {
+                return {
+                    status: false.valueOf(),
+                    message: 'Sản phẩm không tồn tại'
+                }
             }
-        } else {
+        } catch (error) {
             return {
                 status: false.valueOf(),
                 message: 'Xóa sản phẩm thất bại'
             }
         }
-        
-        
     }
+
+    // @UseGuards(AuthGuard)
+    // @Get('update')
+    // async updateProduct(@Query('id') id: string): Promise<{status, message, data}> {
+    //     const productId = parseInt(id);
+    //     const result = await this.productService.getSelectedProduct(productId);
+    //     // console.log(result);
+    //     if(result != null) {
+    //         return {
+    //             status: true.valueOf(),
+    //             message: 'Load sản phẩm thành công',
+    //             data: result
+    //         }
+    //     } else {
+    //         return {
+    //             status: false.valueOf(),
+    //             message: 'Load sản phẩm thất bại',
+    //             data: null
+    //         }
+    //     }
+        
+    // }
 
 }

@@ -30,7 +30,7 @@ import { MulterModule } from '@nestjs/platform-express';
       database: 'OnlineShop',
       schema: 'public',
       autoLoadModels: true,
-      synchronize: false,
+      synchronize: true,
       sync: {
         alter: true
       },

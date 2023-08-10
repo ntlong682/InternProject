@@ -31,7 +31,6 @@ export class Product extends Model {
     imgList: Image[];
 
     @HasOne(() => ProductDetails)
-    productDetails: ProductDetails[];
-    static Image: any;
+    productDetails: ProductDetails;
 
 }
