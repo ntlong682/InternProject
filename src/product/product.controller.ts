@@ -144,26 +144,29 @@ export class ProductController {
         }
     }
 
-    // @UseGuards(AuthGuard)
-    // @Get('update')
-    // async updateProduct(@Query('id') id: string): Promise<{status, message, data}> {
-    //     const productId = parseInt(id);
-    //     const result = await this.productService.getSelectedProduct(productId);
-    //     // console.log(result);
-    //     if(result != null) {
-    //         return {
-    //             status: true.valueOf(),
-    //             message: 'Load sản phẩm thành công',
-    //             data: result
-    //         }
-    //     } else {
-    //         return {
-    //             status: false.valueOf(),
-    //             message: 'Load sản phẩm thất bại',
-    //             data: null
-    //         }
-    //     }
+    @UseGuards(AuthGuard)
+    @Get('update')
+    async updateProduct(@Query('id') id: string): Promise<{status, message, data}> {
+        const productId = parseInt(id);
+        const result = await this.productService.getSelectedProduct(productId);
+        // console.log(result);
+        //Can phai load them color list vs category list
         
-    // }
+
+        if(result != null) {
+            return {
+                status: true.valueOf(),
+                message: 'Load sản phẩm thành công',
+                data: result
+            }
+        } else {
+            return {
+                status: false.valueOf(),
+                message: 'Load sản phẩm thất bại',
+                data: null
+            }
+        }
+        
+    }
 
 }

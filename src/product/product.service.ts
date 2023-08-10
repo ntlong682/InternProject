@@ -139,6 +139,26 @@ export class ProductService {
         return product;
     }
 
+    async findProductUpdateById(productId: number): Promise<Product> {
+        const product = await this.productModel.findOne({
+            include: [
+                {
+                    model: Categories
+                },
+                {
+                    model: Image
+                }, {
+                    model: ProductDetails
+                }
+            ], where: {
+                id: productId
+            }
+        })
+        // console.log(product);
+
+        return product;
+    }
+
     async getListProductForAdmin(): Promise<ListProductAdminDTO[]> {
         const products = await this.findAllProduct();
         if (products != null) {
@@ -164,7 +184,7 @@ export class ProductService {
     }
 
     async getSelectedProduct(id: number): Promise<UpdateProductDTO> {
-        const result = await this.findProductById(id);
+        const result = await this.findProductUpdateById(id);
         if (result != null) {
             let coverImgUrl: string;
             let imgUrlList: string[] = [];
