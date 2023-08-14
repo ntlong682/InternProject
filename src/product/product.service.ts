@@ -1,3 +1,4 @@
+
 import { Image } from 'src/models/image.model';
 import { Injectable, UseInterceptors, UploadedFiles } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
@@ -12,7 +13,9 @@ import { Categories } from "src/models/categories.model";
 import { Op } from 'sequelize';
 import { OrderService } from 'src/order/order.service';
 import { UpdateProductDTO } from 'src/dto/updateProduct.dto';
-import * as fs from 'node:fs';
+import imageToBase64 from 'image-to-base64';
+import * as fs from 'fs';
+
 
 @Injectable()
 export class ProductService {
@@ -104,10 +107,10 @@ export class ProductService {
         });
     }
 
-    async deleteLocalFile(filePath: string) {
-        const fs = require("node:fs");
+    // async deleteLocalFile(filePath: string) {
+    //     const fs = require("node:fs");
         
-    }
+    // }
 
     async findAllProduct(): Promise<Product[]> {
         const products = await this.productModel.findAll({
@@ -195,16 +198,28 @@ export class ProductService {
         return null;
     }
 
+    async converImgToBase64(imgPath: string) : Promise<string> {
+        let result: string = '';
+        await imageToBase64(imgPath).then((result) => {
+            result = result;
+        }).catch((err) => {
+            throw err;
+        });
+        return result;
+    }
+
     async getSelectedProduct(id: number): Promise<UpdateProductDTO> {
         const result = await this.findProductUpdateById(id);
         if (result != null) {
             let coverImgUrl: string;
-            let imgUrlList: string[] = [];
+            let imgDataList: string[] = [];
             let count = 0;
             do {
                 let tempImg = result.imgList[count].imgName;
                 if (tempImg.startsWith('Cover') == true) {
-                    coverImgUrl = result.imgList[count].imgUrl;
+                    coverImgUrl = await this.converImgToBase64(result.imgList[count].imgUrl);
+                    //Dang o day, bi loi ne`
+                    // coverImgUrl = result.imgList[count].imgUrl;
                     break;
                 } 
                 count++;
@@ -215,13 +230,14 @@ export class ProductService {
             do {
                 let tempImg = result.imgList[count].imgName;
                 if (tempImg.startsWith('Cover') == false) {
-                    imgUrlList.push(result.imgList[count].imgUrl);
+                    // imgDataList.push(result.imgList[count].imgUrl);
+                    imgDataList.push(await this.converImgToBase64(result.imgList[count].imgUrl));
                 }
                 count++;
 
             } while (count < result.imgList.length);
 
-            console.log(result);
+            // console.log(result);
 
             const selectedProduct: UpdateProductDTO = {
                 id: result.id,
@@ -237,7 +253,7 @@ export class ProductService {
                 colorId: result.productDetails.color_id,
                 quantity: result.productDetails.quantity,
                 coverImg: coverImgUrl,
-                imgList: imgUrlList
+                imgList: imgDataList
             };
             return selectedProduct;
         }
@@ -252,6 +268,8 @@ export class ProductService {
                 //xoa img
                 //Xoa img khoi local file
                 //code here
+                const result = this.imageService.findAllImgByProductId(id);
+                console.log(result);
 
                 await this.imageService.deleteImageByProductId(id);
                 //xoa product details

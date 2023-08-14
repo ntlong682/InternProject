@@ -1,4 +1,4 @@
-import { Controller, Get, Post, UploadedFiles, UseInterceptors, Query, Body, UseGuards, Delete } from "@nestjs/common";
+import { Controller, Get, Post, UploadedFiles, UseInterceptors, Query, Body, UseGuards, Delete, Res } from "@nestjs/common";
 import { ProductService } from "./product.service";
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { diskStorage } from "multer";
@@ -28,6 +28,10 @@ export class ProductController {
     async getCategoriesAndColorList(): Promise<any> {
         return this.productService.getCategoriesAndColor();
     }
+
+    // async testResponeFile(@Res() res) {
+
+    // }
 
     @UseGuards(AuthGuard)
     @Post('create')
