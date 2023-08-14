@@ -15,6 +15,7 @@ import { OrderService } from 'src/order/order.service';
 import { UpdateProductDTO } from 'src/dto/updateProduct.dto';
 import imageToBase64 from 'image-to-base64';
 import * as fs from 'fs';
+import { error } from 'console';
 
 
 @Injectable()
@@ -103,14 +104,21 @@ export class ProductService {
 
     async deleteLocalProductImageError(@UploadedFiles() files: { coverImage?: Express.Multer.File[], Images?: Express.Multer.File[] }) {
         files.coverImage.forEach(file => {
-            
+            this.deleteLocalFile(file.path);
+        });
+        files.Images.forEach(file => {
+            this.deleteLocalFile(file.path);
         });
     }
 
-    // async deleteLocalFile(filePath: string) {
-    //     const fs = require("node:fs");
+    async deleteLocalFile(filePath: string) {
+        fs.unlink(filePath, (err) => {
+            if(err){
+                throw err;
+            }
+        })
         
-    // }
+    }
 
     async findAllProduct(): Promise<Product[]> {
         const products = await this.productModel.findAll({
@@ -217,9 +225,9 @@ export class ProductService {
             do {
                 let tempImg = result.imgList[count].imgName;
                 if (tempImg.startsWith('Cover') == true) {
-                    coverImgUrl = await this.converImgToBase64(result.imgList[count].imgUrl);
+                    // coverImgUrl = await this.converImgToBase64(result.imgList[count].imgUrl);
                     //Dang o day, bi loi ne`
-                    // coverImgUrl = result.imgList[count].imgUrl;
+                    coverImgUrl = result.imgList[count].imgUrl;
                     break;
                 } 
                 count++;
@@ -230,8 +238,8 @@ export class ProductService {
             do {
                 let tempImg = result.imgList[count].imgName;
                 if (tempImg.startsWith('Cover') == false) {
-                    // imgDataList.push(result.imgList[count].imgUrl);
-                    imgDataList.push(await this.converImgToBase64(result.imgList[count].imgUrl));
+                    imgDataList.push(result.imgList[count].imgUrl);
+                    // imgDataList.push(await this.converImgToBase64(result.imgList[count].imgUrl));
                 }
                 count++;
 
@@ -261,6 +269,7 @@ export class ProductService {
         return null;
     }
 
+
     async deleteProduct(id: number): Promise<boolean> {
         try {
             const checkExist = this.orderService.checkProductExistInOrder(id);
@@ -268,8 +277,11 @@ export class ProductService {
                 //xoa img
                 //Xoa img khoi local file
                 //code here
-                const result = this.imageService.findAllImgByProductId(id);
-                console.log(result);
+                const result = await this.imageService.findAllImgByProductId(id);
+                // console.log(result);
+                result.forEach(img => {
+                    this.deleteLocalFile(img.imgUrl);
+                });
 
                 await this.imageService.deleteImageByProductId(id);
                 //xoa product details

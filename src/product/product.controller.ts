@@ -89,6 +89,7 @@ export class ProductController {
                 status: false.valueOf()
             };
         } else {
+            await this.productService.deleteLocalProductImageError(files);
             return {
                 status: false.valueOf()
             };
