@@ -206,15 +206,15 @@ export class ProductService {
         return null;
     }
 
-    async converImgToBase64(imgPath: string) : Promise<string> {
-        let result: string = '';
-        await imageToBase64(imgPath).then((result) => {
-            result = result;
-        }).catch((err) => {
-            throw err;
-        });
-        return result;
-    }
+    // async converImgToBase64(imgPath: string) : Promise<string> {
+    //     let result: string = '';
+    //     await imageToBase64(imgPath).then((result) => {
+    //         result = result;
+    //     }).catch((err) => {
+    //         throw err;
+    //     });
+    //     return result;
+    // }
 
     async getSelectedProduct(id: number): Promise<UpdateProductDTO> {
         const result = await this.findProductUpdateById(id);
