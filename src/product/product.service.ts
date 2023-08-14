@@ -13,7 +13,7 @@ import { Categories } from "src/models/categories.model";
 import { Op } from 'sequelize';
 import { OrderService } from 'src/order/order.service';
 import { UpdateProductDTO } from 'src/dto/updateProduct.dto';
-import imageToBase64 from 'image-to-base64';
+// import imageToBase64 from 'image-to-base64';
 import * as fs from 'fs';
 import { error } from 'console';
 
@@ -305,6 +305,7 @@ export class ProductService {
             return false;
         }
     }
+
 
 
 }

@@ -7,13 +7,18 @@ import { ImageService } from "src/image/image.service";
 import { ColorService } from "src/color/color.service";
 import { AuthGuard } from "src/auth/auth.guard";
 import { v4 as uuidv4 } from 'uuid';
+import { CategoriesService } from "src/categories/categories.service";
+import * as fs from 'fs';
+import { of } from "rxjs";
+import { Response } from "express";
 
 @Controller('product')
 export class ProductController {
     constructor(
         private readonly productService: ProductService,
         private readonly imageService: ImageService,
-        private readonly colorService: ColorService
+        private readonly colorService: ColorService,
+        private readonly categoriesService: CategoriesService,
     ) { }
 
     imageFileFilter = (req, file, callback) => {
@@ -45,6 +50,7 @@ export class ProductController {
                 callback(null, uuidv4() + ".png");
             }
         })
+        // fileFilter: imageF
     }))
     async createProduct(@UploadedFiles() files: { coverImage?: Express.Multer.File[], Images?: Express.Multer.File[] },
         @Body() body: createProductDTO): Promise<any> {
@@ -151,27 +157,53 @@ export class ProductController {
 
     @UseGuards(AuthGuard)
     @Get('update')
-    async updateProduct(@Query('id') id: string): Promise<{status, message, data}> {
+    async updateProduct(@Query('id') id: string): Promise<{status, message, data, colors, categories}> {
         const productId = parseInt(id);
         const result = await this.productService.getSelectedProduct(productId);
         // console.log(result);
         //Can phai load them color list vs category list
-        
-
+        const colorList = await this.colorService.findAll();
+        const categories = await this.categoriesService.findAll();
         if(result != null) {
             return {
                 status: true.valueOf(),
                 message: 'Load sản phẩm thành công',
+                colors: colorList,
+                categories: categories,
                 data: result
             }
         } else {
             return {
                 status: false.valueOf(),
                 message: 'Load sản phẩm thất bại',
+                colors: null,
+                categories: null,
                 data: null
             }
         }
-        
+
     }
+
+    // @Get('testfile')
+    // async testResponeFile(@Res() res: Response) {
+    //     let flag = true;
+    //     const file = fs.readFile();
+    //     // const file = fs.readFile('files\a060f669-fbd9-4ba2-a18e-9d8cd17034ec.png', (err) => {
+    //     //     if(err) {
+    //     //         flag = false;
+    //     //     }
+    //     // })
+
+    //     console.log(file);
+
+    //     if(flag == true) {
+    //         res.contentType('png');
+    //         res.send(file);
+    //     } else {
+    //         return {
+    //             data: false.valueOf()
+    //         }
+    //     }
+    // }
 
 }
