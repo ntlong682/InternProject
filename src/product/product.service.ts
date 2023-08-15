@@ -12,10 +12,11 @@ import { ListProductAdminDTO } from "src/dto/listProductAdmin.dto";
 import { Categories } from "src/models/categories.model";
 import { Op } from 'sequelize';
 import { OrderService } from 'src/order/order.service';
-import { UpdateProductDTO } from 'src/dto/updateProduct.dto';
+import { GetUpdateProductDTO } from 'src/dto/updateProduct.dto';
 // import imageToBase64 from 'image-to-base64';
 import * as fs from 'fs';
 import { error } from 'console';
+import { UpdateSelectedProductDTO } from 'src/dto/updateSelectedProduct';
 
 
 @Injectable()
@@ -216,7 +217,7 @@ export class ProductService {
     //     return result;
     // }
 
-    async getSelectedProduct(id: number): Promise<UpdateProductDTO> {
+    async getSelectedProduct(id: number): Promise<GetUpdateProductDTO> {
         const result = await this.findProductUpdateById(id);
         if (result != null) {
             let coverImgUrl: string;
@@ -247,7 +248,7 @@ export class ProductService {
 
             // console.log(result);
 
-            const selectedProduct: UpdateProductDTO = {
+            const selectedProduct: GetUpdateProductDTO = {
                 id: result.id,
                 name: result.name,
                 price: result.price,
@@ -267,6 +268,39 @@ export class ProductService {
         }
 
         return null;
+    }
+
+    async updateProduct(updateDTO: UpdateSelectedProductDTO) : Promise<boolean> {
+        try {
+            await this.productModel.update({
+                name: updateDTO.name,
+                price: updateDTO.price,
+                oldPrice: updateDTO.oldprice,
+                category_id: updateDTO.categoryId
+            }, {
+                where: {
+                    id: updateDTO.id
+                }
+            })
+
+            await this.productDetailsModel.update({
+                cpuName: updateDTO.cpu,
+                screen: updateDTO.screen,
+                ram: updateDTO.ram,
+                rom: updateDTO.rom,
+                weight: updateDTO.weight,
+                color_id: updateDTO.colorId,
+                quantity: updateDTO.quantity
+            }, {
+                where: {
+                    product_id: updateDTO.id
+                }
+            })
+
+            return true;
+        } catch (error) {
+            return false;
+        }
     }
 
 

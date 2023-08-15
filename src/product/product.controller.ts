@@ -1,4 +1,4 @@
-import { Controller, Get, Post, UploadedFiles, UseInterceptors, Query, Body, UseGuards, Delete, Res } from "@nestjs/common";
+import { Controller, Get, Post, UploadedFiles, UseInterceptors, Query, Body, UseGuards, Delete, Res, UsePipes, ValidationPipe } from "@nestjs/common";
 import { ProductService } from "./product.service";
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { diskStorage } from "multer";
@@ -8,9 +8,8 @@ import { ColorService } from "src/color/color.service";
 import { AuthGuard } from "src/auth/auth.guard";
 import { v4 as uuidv4 } from 'uuid';
 import { CategoriesService } from "src/categories/categories.service";
-import * as fs from 'fs';
-import { of } from "rxjs";
-import { Response } from "express";
+import { UpdateSelectedProductDTO } from "src/dto/updateSelectedProduct";
+import { validate } from "class-validator";
 
 @Controller('product')
 export class ProductController {
@@ -21,12 +20,12 @@ export class ProductController {
         private readonly categoriesService: CategoriesService,
     ) { }
 
-    imageFileFilter = (req, file, callback) => {
-        if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
-            return callback(new Error('Only image files are allowed!'), false);
-        }
-        callback(null, true);
-    };
+    // imageFileFilter = (req, file, callback) => {
+    //     if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+    //         return callback(new Error('Only image files are allowed!'), false);
+    //     }
+    //     callback(null, true);
+    // };
 
     @UseGuards(AuthGuard)
     @Get('create')
@@ -40,6 +39,7 @@ export class ProductController {
 
     @UseGuards(AuthGuard)
     @Post('create')
+    @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
     @UseInterceptors(FileFieldsInterceptor([
         { name: 'coverImage', maxCount: 1 },
         { name: 'Images', maxCount: 5 }
@@ -49,11 +49,15 @@ export class ProductController {
             filename: function (req, file, callback) {
                 callback(null, uuidv4() + ".png");
             }
-        })
-        // fileFilter: imageF
+        }),
+        fileFilter: (req, file, callback) => {
+            if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+                return callback(new Error('Only image files are allowed!'), false);
+            }
+            callback(null, true);
+        }
     }))
-    async createProduct(@UploadedFiles() files: { coverImage?: Express.Multer.File[], Images?: Express.Multer.File[] },
-        @Body() body: createProductDTO): Promise<any> {
+    async createProduct(@Body() body: createProductDTO, @UploadedFiles() files: { coverImage?: Express.Multer.File[], Images?: Express.Multer.File[] }): Promise<{ status }> {
         // console.log(files);
         // console.log(body);
         let flag = true;
@@ -90,10 +94,12 @@ export class ProductController {
                         };
                     }
                 }
+            } else {
+                await this.productService.deleteLocalProductImageError(files);
+                return {
+                    status: false.valueOf()
+                };
             }
-            return {
-                status: false.valueOf()
-            };
         } else {
             await this.productService.deleteLocalProductImageError(files);
             return {
@@ -157,14 +163,14 @@ export class ProductController {
 
     @UseGuards(AuthGuard)
     @Get('update')
-    async updateProduct(@Query('id') id: string): Promise<{status, message, data, colors, categories}> {
+    async getUpdateProduct(@Query('id') id: string): Promise<{ status, message, data, colors, categories }> {
         const productId = parseInt(id);
         const result = await this.productService.getSelectedProduct(productId);
         // console.log(result);
         //Can phai load them color list vs category list
         const colorList = await this.colorService.findAll();
         const categories = await this.categoriesService.findAll();
-        if(result != null) {
+        if (result != null) {
             return {
                 status: true.valueOf(),
                 message: 'Load sản phẩm thành công',
@@ -183,6 +189,102 @@ export class ProductController {
         }
 
     }
+
+    @UseGuards(AuthGuard)
+    @Post('update')
+    @UseInterceptors(
+        FileFieldsInterceptor([
+            { name: 'coverImage', maxCount: 1 },
+            { name: 'Images', maxCount: 5 }
+        ], {
+            storage: diskStorage({
+                destination: './files',
+                filename: function (req, file, callback) {
+                    callback(null, uuidv4() + ".png");
+                }
+            }),
+            fileFilter: (req, file, callback) => {
+                if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+                    return callback(new Error('Only image files are allowed!'), false);
+                }
+                callback(null, true);
+            }
+        })
+    )
+    // @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+    async updateProduct(@UploadedFiles() files: { coverImage?: Express.Multer.File[], Images?: Express.Multer.File[] },
+        @Body() body: UpdateSelectedProductDTO): Promise<{ status, message }> {
+        // const validationError = await validate(body);
+        // await this.saveFileToLocal(files);    
+        let flag = true;
+        if (await this.colorService.checkColorExist(body.colorId) == false
+            || await this.categoriesService.checkCategoryId(body.categoryId) == false) {
+            flag = false;
+        } else {
+            const product = await this.productService.findProductById(body.id);
+            // console.log(product);
+            const imgList = await this.imageService.findAllImgByProductId(body.id);
+            // console.log(imgList);
+
+            await this.imageService.deleteImageByProductId(body.id);
+
+            const saveProductImgSuccess = await this.productService.saveProductsImage(files, body.id);
+            if (product != null && saveProductImgSuccess == true) {
+                const update = await this.productService.updateProduct(body);
+                if (update != true) {
+                    flag = false;
+                } else {
+                    imgList.forEach(async img => {
+                        await this.productService.deleteLocalFile(img.imgUrl);
+                    });
+                }
+            } else {
+                flag = false;
+            }
+            if (flag == false) {
+                imgList.forEach(async img => {
+                    await this.imageService.addImage(img.imgName, img.imgUrl, img.product_id);
+                });
+            }
+        }
+        // console.log(flag);
+
+
+        if (flag == true) {
+            return {
+                status: true.valueOf(),
+                message: 'Update sản phẩm thành công'
+            }
+        } else {
+            await this.productService.deleteLocalProductImageError(files);
+            return {
+                status: false.valueOf(),
+                message: 'Update sản phẩm thất bại'
+            }
+        }
+    }
+
+    // @UseInterceptors(FileFieldsInterceptor([
+    //     { name: 'coverImage', maxCount: 1 },
+    //     { name: 'Images', maxCount: 5 }
+    // ], {
+    //     storage: diskStorage({
+    //         destination: './files',
+    //         filename: function (req, file, callback) {
+    //             callback(null, uuidv4() + ".png");
+    //         }
+    //     }),
+    //     fileFilter: (req, file, callback) => {
+    //         if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+    //             return callback(new Error('Only image files are allowed!'), false);
+    //         }
+    //         callback(null, true);
+    //     }
+    // }))
+    // async saveFileToLocal(@UploadedFiles() files: { coverImage?: Express.Multer.File[], Images?: Express.Multer.File[] }) {
+
+    // }
+
 
     // @Get('testfile')
     // async testResponeFile(@Res() res: Response) {
