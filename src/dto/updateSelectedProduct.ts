@@ -49,9 +49,9 @@ export class UpdateSelectedProductDTO {
     @IsNumberString()
     quantity: number
 
-    @IsNotEmpty()
-    coverImage: Express.Multer.File[]; // Array of uploaded files
+    // @IsNotEmpty()
+    // coverImage: Express.Multer.File[]; // Array of uploaded files
 
-    @IsNotEmpty()
-    Images: Express.Multer.File[]; // Array of uploaded files
+    // @IsNotEmpty()
+    // Images: Express.Multer.File[]; // Array of uploaded files
 }
