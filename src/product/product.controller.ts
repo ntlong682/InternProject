@@ -117,7 +117,7 @@ export class ProductController {
     @Get('list-product')
     async getListProduct(): Promise<any> {
         const result = await this.productService.getListProductForAdmin();
-        console.log(result);
+        // console.log(result);
         if (result != null) {
             return {
                 status: true.valueOf(),
@@ -273,6 +273,18 @@ export class ProductController {
                 status: false.valueOf(),
                 message: 'Update sản phẩm thất bại'
             }
+        }
+    }
+
+
+    @Get('home')
+    async getListProductHomePage(): Promise<{ status, message, data }> {
+
+
+        return {
+            status: '',
+            message: '',
+            data: ''
         }
     }
 

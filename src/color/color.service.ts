@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
+import { where } from 'sequelize';
 import { Sequelize } from 'sequelize-typescript';
 import { Color } from 'src/models/color.model';
 
@@ -36,6 +37,18 @@ export class ColorService {
             return result != null;
         } catch (error) {
             return false;
+        }
+    }
+
+    async findColorById(colorId: number) : Promise<Color> {
+        try {
+            const result = await this.colorModel.findOne({where: {
+                id: colorId
+            }})
+            // console.log(result);
+            return result;
+        } catch (error) {
+            return null;
         }
     }
 }

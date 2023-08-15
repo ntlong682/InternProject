@@ -104,26 +104,26 @@ export class ProductService {
     }
 
     async deleteLocalProductImageError(@UploadedFiles() files: { coverImage?: Express.Multer.File[], Images?: Express.Multer.File[] }) {
-        if(files.coverImage != null && files.coverImage.length > 0) {
+        if (files.coverImage != null && files.coverImage.length > 0) {
             files.coverImage.forEach(file => {
                 this.deleteLocalFile(file.path);
             });
         }
-        if(files.Images != null && files.Images.length > 0) {
+        if (files.Images != null && files.Images.length > 0) {
             files.Images.forEach(file => {
                 this.deleteLocalFile(file.path);
             });
         }
-        
+
     }
 
     async deleteLocalFile(filePath: string) {
         fs.unlink(filePath, (err) => {
-            if(err){
+            if (err) {
                 throw err;
             }
         })
-        
+
     }
 
     async findAllProduct(): Promise<Product[]> {
@@ -139,6 +139,9 @@ export class ProductService {
                             [Op.startsWith]: 'Cover'
                         }
                     }
+                }, 
+                {
+                    model: ProductDetails
                 }
             ]
         });
@@ -192,20 +195,21 @@ export class ProductService {
         const products = await this.findAllProduct();
         if (products != null) {
             let result: ListProductAdminDTO[] = [];
-            products.forEach(p => {
-                // const coverImg = this.imageService.findCoverImageByProductId(p.id);
-                // const coverImgPath = (await coverImg).imgUrl;//here
+
+            for(const p of Object.values(products)) {
+                const color = await this.colorService.findColorById(p.productDetails.color_id);
                 const newProductDTO: ListProductAdminDTO = {
                     id: p.id,
                     productName: p.name,
                     price: p.price,
-                    oldPrice: p.oldPrice,
+                    color: color.name,
+                    quantity: p.productDetails.quantity,
                     categoryName: p.category.categoryName,
-                    coverImgPath: p.imgList[0].imgUrl
                 }
                 result.push(newProductDTO);
-            });
-
+            }
+            console.log('Print Result: ');
+            console.log(result);
             return result;
         }
 
@@ -235,7 +239,7 @@ export class ProductService {
                     //Dang o day, bi loi ne`
                     coverImgUrl = result.imgList[count].imgUrl;
                     break;
-                } 
+                }
                 count++;
 
             } while (count < result.imgList.length);
@@ -275,7 +279,7 @@ export class ProductService {
         return null;
     }
 
-    async updateProduct(updateDTO: UpdateSelectedProductDTO) : Promise<boolean> {
+    async updateProduct(updateDTO: UpdateSelectedProductDTO): Promise<boolean> {
         try {
             await this.productModel.update({
                 name: updateDTO.name,
@@ -343,6 +347,10 @@ export class ProductService {
         } catch (error) {
             return false;
         }
+    }
+
+    async findAllProductByCategory(categoryId: number) {
+
     }
 
 
