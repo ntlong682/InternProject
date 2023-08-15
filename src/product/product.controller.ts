@@ -64,7 +64,7 @@ export class ProductController {
         if (files.coverImage == null || files.coverImage.length == 0) {
             flag = false;
         }
-        if (files.Images == null || files.coverImage.length == 0) {
+        if (files.Images == null || files.Images.length == 0) {
             flag = false;
         }
         // files.coverImage.forEach(async file => {
@@ -225,7 +225,7 @@ export class ProductController {
         if (files.coverImage == null || files.coverImage.length == 0) {
             flag = false;
         }
-        if (files.Images == null || files.coverImage.length == 0) {
+        if (files.Images == null || files.Images.length == 0) {
             flag = false;
         }
         if (await this.colorService.checkColorExist(body.colorId) == false
