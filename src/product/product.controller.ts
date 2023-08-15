@@ -61,7 +61,12 @@ export class ProductController {
         // console.log(files);
         // console.log(body);
         let flag = true;
-
+        if (files.coverImage == null || files.coverImage.length == 0) {
+            flag = false;
+        }
+        if (files.Images == null || files.coverImage.length == 0) {
+            flag = false;
+        }
         // files.coverImage.forEach(async file => {
         //     if ( await this.imageService.checkImageNotExist(`Cover${file.originalname}`) != true) {
         //         flag = false;
@@ -217,10 +222,17 @@ export class ProductController {
         // const validationError = await validate(body);
         // await this.saveFileToLocal(files);    
         let flag = true;
+        if (files.coverImage == null || files.coverImage.length == 0) {
+            flag = false;
+        }
+        if (files.Images == null || files.coverImage.length == 0) {
+            flag = false;
+        }
         if (await this.colorService.checkColorExist(body.colorId) == false
             || await this.categoriesService.checkCategoryId(body.categoryId) == false) {
             flag = false;
-        } else {
+        }
+        if (flag == true) {
             const product = await this.productService.findProductById(body.id);
             // console.log(product);
             const imgList = await this.imageService.findAllImgByProductId(body.id);

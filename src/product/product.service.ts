@@ -104,12 +104,17 @@ export class ProductService {
     }
 
     async deleteLocalProductImageError(@UploadedFiles() files: { coverImage?: Express.Multer.File[], Images?: Express.Multer.File[] }) {
-        files.coverImage.forEach(file => {
-            this.deleteLocalFile(file.path);
-        });
-        files.Images.forEach(file => {
-            this.deleteLocalFile(file.path);
-        });
+        if(files.coverImage != null && files.coverImage.length > 0) {
+            files.coverImage.forEach(file => {
+                this.deleteLocalFile(file.path);
+            });
+        }
+        if(files.Images != null && files.Images.length > 0) {
+            files.Images.forEach(file => {
+                this.deleteLocalFile(file.path);
+            });
+        }
+        
     }
 
     async deleteLocalFile(filePath: string) {
