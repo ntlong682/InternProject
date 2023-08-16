@@ -280,8 +280,7 @@ export class ProductController {
     //Fix lai sau, fix update product truoc
     @Get('home')
     async getListProductHomePage(): Promise<{ status, message, data }> {
-        // const data = await this.productService.getProductsForHomePage();
-        const data = null;
+        const data = await this.productService.getProductsForHomePage();
         console.log(data);
         return {
             status: true.valueOf(),
