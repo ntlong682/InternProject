@@ -30,7 +30,7 @@ export class Product extends Model {
     @HasMany(() => Image)
     imgList: Image[];
 
-    @HasOne(() => ProductDetails)
-    productDetails: ProductDetails;
+    @HasMany(() => ProductDetails)
+    productDetails: ProductDetails[];
 
 }

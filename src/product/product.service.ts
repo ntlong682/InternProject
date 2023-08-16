@@ -10,7 +10,7 @@ import { ImageService } from "src/image/image.service";
 import { ProductDetails } from "src/models/productdetails.model";
 import { ListProductAdminDTO } from "src/dto/listProductAdmin.dto";
 import { Categories } from "src/models/categories.model";
-import { Op } from 'sequelize';
+import { Op, where } from 'sequelize';
 import { OrderService } from 'src/order/order.service';
 import { GetUpdateProductDTO } from 'src/dto/updateProduct.dto';
 // import imageToBase64 from 'image-to-base64';
@@ -198,14 +198,26 @@ export class ProductService {
             let result: ListProductAdminDTO[] = [];
 
             for (const p of Object.values(products)) {
-                const color = await this.colorService.findColorById(p.productDetails.color_id);
+                // const color = await this.colorService.findColorById(p.productDetails.color_id);
+                const productDetails = await this.productDetailsModel.findAll({
+                    where: {
+                        product_id: p.id
+                    }
+                })
+                let totalQuantity = 0
+
+                for(const pd of Object.values(productDetails)) {
+                    totalQuantity += pd.quantity;
+                }
+
                 const newProductDTO: ListProductAdminDTO = {
                     id: p.id,
                     productName: p.name,
                     price: p.price,
-                    color: color.name,
-                    quantity: p.productDetails.quantity,
+                    // color: color.name,
+                    quantity: totalQuantity,
                     categoryName: p.category.categoryName,
+                    coverImgPath: p.imgList[0].imgUrl
                 }
                 result.push(newProductDTO);
             }
@@ -258,23 +270,25 @@ export class ProductService {
 
             // console.log(result);
 
-            const selectedProduct: GetUpdateProductDTO = {
-                id: result.id,
-                name: result.name,
-                price: result.price,
-                oldprice: result.oldPrice,
-                categoryId: result.category_id,
-                cpu: result.productDetails.cpuName,
-                ram: result.productDetails.ram,
-                rom: result.productDetails.rom,
-                screen: result.productDetails.screen,
-                weight: result.productDetails.color_id,
-                colorId: result.productDetails.color_id,
-                quantity: result.productDetails.quantity,
-                coverImg: coverImgUrl,
-                imgList: imgDataList
-            };
-            return selectedProduct;
+
+            //Fix lai update
+            // const selectedProduct: GetUpdateProductDTO = {
+            //     id: result.id,
+            //     name: result.name,
+            //     price: result.price,
+            //     oldprice: result.oldPrice,
+            //     categoryId: result.category_id,
+            //     cpu: result.productDetails.cpuName,
+            //     ram: result.productDetails.ram,
+            //     rom: result.productDetails.rom,
+            //     screen: result.productDetails.screen,
+            //     weight: result.productDetails.color_id,
+            //     colorId: result.productDetails.color_id,
+            //     quantity: result.productDetails.quantity,
+            //     coverImg: coverImgUrl,
+            //     imgList: imgDataList
+            // };
+            // return selectedProduct;
         }
 
         return null;
@@ -400,84 +414,95 @@ export class ProductService {
         return result;
     }
 
-    async getProductsForHomePage() : Promise<any> {
 
-        const allProducts = await this.findAllAvaiableProduct();
-        let products: HomeProductDTO[]= [];
-        for(const p of Object.values(allProducts)) {
-            let temp: HomeProductDTO = {
-                id: p.id,
-                coverImg: p.imgList[0].imgUrl,
-                price: p.price,
-                oldPrice: p.oldPrice,
-                cpu: p.productDetails.cpuName,
-                screen: p.productDetails.screen,
-                ram: p.productDetails.ram,
-                rom: p.productDetails.rom,
-                weight: p.productDetails.weight
+    //Fix lai sau, fix update Product truoc
+    // async getProductsForHomePage() : Promise<any> {
+
+    //     const allProducts = await this.findAllAvaiableProduct();
+    //     let products: HomeProductDTO[]= [];
+    //     for(const p of Object.values(allProducts)) {
+    //         let temp: HomeProductDTO = {
+    //             id: p.id,
+    //             coverImg: p.imgList[0].imgUrl,
+    //             price: p.price,
+    //             oldPrice: p.oldPrice,
+    //             cpu: p.productDetails.cpuName,
+    //             screen: p.productDetails.screen,
+    //             ram: p.productDetails.ram,
+    //             rom: p.productDetails.rom,
+    //             weight: p.productDetails.weight
+    //         }
+    //         products.push(temp);
+    //     }
+
+    //     const laptopsProduct = await this.findAllProductByCategory(1);
+    //     let laptops: HomeProductDTO[]= [];
+    //     for(const p of Object.values(laptopsProduct)) {
+    //         let temp: HomeProductDTO = {
+    //             id: p.id,
+    //             coverImg: p.imgList[0].imgUrl,
+    //             price: p.price,
+    //             oldPrice: p.oldPrice,
+    //             cpu: p.productDetails.cpuName,
+    //             screen: p.productDetails.screen,
+    //             ram: p.productDetails.ram,
+    //             rom: p.productDetails.rom,
+    //             weight: p.productDetails.weight
+    //         }
+    //         laptops.push(temp);
+    //     }
+
+    //     const tabletsProduct = await this.findAllProductByCategory(2);
+    //     let tablets: HomeProductDTO[]= [];
+    //     for(const p of Object.values(tabletsProduct)) {
+    //         let temp: HomeProductDTO = {
+    //             id: p.id,
+    //             coverImg: p.imgList[0].imgUrl,
+    //             price: p.price,
+    //             oldPrice: p.oldPrice,
+    //             cpu: p.productDetails.cpuName,
+    //             screen: p.productDetails.screen,
+    //             ram: p.productDetails.ram,
+    //             rom: p.productDetails.rom,
+    //             weight: p.productDetails.weight
+    //         }
+    //         tablets.push(temp);
+    //     }
+
+    //     const phonesProduct = await this.findAllProductByCategory(3);
+    //     let phones: HomeProductDTO[]= [];
+    //     for(const p of Object.values(phonesProduct)) {
+    //         let temp: HomeProductDTO = {
+    //             id: p.id,
+    //             coverImg: p.imgList[0].imgUrl,
+    //             price: p.price,
+    //             oldPrice: p.oldPrice,
+    //             cpu: p.productDetails.cpuName,
+    //             screen: p.productDetails.screen,
+    //             ram: p.productDetails.ram,
+    //             rom: p.productDetails.rom,
+    //             weight: p.productDetails.weight
+    //         }
+    //         phones.push(temp);
+    //     }
+
+    //     return {
+    //         products: products,
+    //         laptops: laptops,
+    //         tablets: tablets,
+    //         phones: phones
+    //     }
+    // }
+
+    async checkProductExistByCategoryId(categoryId: number) : Promise<boolean> {
+        const result = await this.productModel.count({
+            where: {
+                category_id: categoryId
             }
-            products.push(temp);
-        }
+        })
 
-        const laptopsProduct = await this.findAllProductByCategory(1);
-        let laptops: HomeProductDTO[]= [];
-        for(const p of Object.values(laptopsProduct)) {
-            let temp: HomeProductDTO = {
-                id: p.id,
-                coverImg: p.imgList[0].imgUrl,
-                price: p.price,
-                oldPrice: p.oldPrice,
-                cpu: p.productDetails.cpuName,
-                screen: p.productDetails.screen,
-                ram: p.productDetails.ram,
-                rom: p.productDetails.rom,
-                weight: p.productDetails.weight
-            }
-            laptops.push(temp);
-        }
+        return result > 0
 
-        const tabletsProduct = await this.findAllProductByCategory(2);
-        let tablets: HomeProductDTO[]= [];
-        for(const p of Object.values(tabletsProduct)) {
-            let temp: HomeProductDTO = {
-                id: p.id,
-                coverImg: p.imgList[0].imgUrl,
-                price: p.price,
-                oldPrice: p.oldPrice,
-                cpu: p.productDetails.cpuName,
-                screen: p.productDetails.screen,
-                ram: p.productDetails.ram,
-                rom: p.productDetails.rom,
-                weight: p.productDetails.weight
-            }
-            tablets.push(temp);
-        }
-
-        const phonesProduct = await this.findAllProductByCategory(3);
-        let phones: HomeProductDTO[]= [];
-        for(const p of Object.values(phonesProduct)) {
-            let temp: HomeProductDTO = {
-                id: p.id,
-                coverImg: p.imgList[0].imgUrl,
-                price: p.price,
-                oldPrice: p.oldPrice,
-                cpu: p.productDetails.cpuName,
-                screen: p.productDetails.screen,
-                ram: p.productDetails.ram,
-                rom: p.productDetails.rom,
-                weight: p.productDetails.weight
-            }
-            phones.push(temp);
-        }
-
-        return {
-            products: products,
-            laptops: laptops,
-            tablets: tablets,
-            phones: phones
-        }
     }
-
-
 
 }

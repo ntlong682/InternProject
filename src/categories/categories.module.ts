@@ -6,6 +6,8 @@ import { Categories } from "src/models/categories.model";
 import { AuthGuard } from "src/auth/auth.guard";
 import { JwtService } from "@nestjs/jwt";
 
+
+
 @Module({
     imports: [SequelizeModule.forFeature([Categories])],
     providers: [CategoriesService, AuthGuard, JwtService],

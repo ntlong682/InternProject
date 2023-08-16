@@ -277,9 +277,11 @@ export class ProductController {
     }
 
 
+    //Fix lai sau, fix update product truoc
     @Get('home')
     async getListProductHomePage(): Promise<{ status, message, data }> {
-        const data = await this.productService.getProductsForHomePage();
+        // const data = await this.productService.getProductsForHomePage();
+        const data = null;
         console.log(data);
         return {
             status: true.valueOf(),
@@ -287,49 +289,4 @@ export class ProductController {
             data: data
         }
     }
-
-    // @UseInterceptors(FileFieldsInterceptor([
-    //     { name: 'coverImage', maxCount: 1 },
-    //     { name: 'Images', maxCount: 5 }
-    // ], {
-    //     storage: diskStorage({
-    //         destination: './files',
-    //         filename: function (req, file, callback) {
-    //             callback(null, uuidv4() + ".png");
-    //         }
-    //     }),
-    //     fileFilter: (req, file, callback) => {
-    //         if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
-    //             return callback(new Error('Only image files are allowed!'), false);
-    //         }
-    //         callback(null, true);
-    //     }
-    // }))
-    // async saveFileToLocal(@UploadedFiles() files: { coverImage?: Express.Multer.File[], Images?: Express.Multer.File[] }) {
-
-    // }
-
-
-    // @Get('testfile')
-    // async testResponeFile(@Res() res: Response) {
-    //     let flag = true;
-    //     const file = fs.readFile();
-    //     // const file = fs.readFile('files\a060f669-fbd9-4ba2-a18e-9d8cd17034ec.png', (err) => {
-    //     //     if(err) {
-    //     //         flag = false;
-    //     //     }
-    //     // })
-
-    //     console.log(file);
-
-    //     if(flag == true) {
-    //         res.contentType('png');
-    //         res.send(file);
-    //     } else {
-    //         return {
-    //             data: false.valueOf()
-    //         }
-    //     }
-    // }
-
 }

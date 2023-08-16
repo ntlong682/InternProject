@@ -1,8 +1,9 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import { Op } from "sequelize";
 import { Sequelize } from "sequelize-typescript";
 import { Categories } from "src/models/categories.model";
+import { ProductService } from "src/product/product.service";
 
 
 @Injectable()
@@ -11,14 +12,17 @@ export class CategoriesService {
         @InjectModel(Categories)
         private categoryModel: typeof Categories,
         private sequelize: Sequelize
-    ) {}
+    ) { }
 
+    // @Inject(ProductService)
+    // private productService: ProductService
+    
 
     //Run 1 time
-    async addCategory() : Promise<string> {
+    async addCategory(): Promise<string> {
         try {
             await this.sequelize.transaction(async t => {
-                const transactionHost = {transaction: t};
+                const transactionHost = { transaction: t };
 
                 await this.categoryModel.create(
                     {
@@ -39,28 +43,28 @@ export class CategoriesService {
                 );
             })
             return 'Create categories success!';
-        } catch(error) {
+        } catch (error) {
             return 'Create categories failed!';
         }
     }
 
-    async findAll() : Promise<Categories[]> {
+    async findAll(): Promise<Categories[]> {
         return this.categoryModel.findAll();
     }
 
-    async checkCategoryId(id : number) : Promise<boolean> {
+    async checkCategoryId(id: number): Promise<boolean> {
         const category = this.categoryModel.findOne({
             where: {
-                id : id,
+                id: id,
             }
         })
 
         return category != null;
     }
 
-    async createCategory(name: string) : Promise<boolean> {
+    async createCategory(name: string): Promise<boolean> {
         const checkNameExist = await this.checkCategoryNameExist(name);
-        if(checkNameExist != true) {
+        if (checkNameExist != true) {
             try {
                 await this.categoryModel.create({
                     categoryName: name
@@ -74,7 +78,7 @@ export class CategoriesService {
         }
     }
 
-    async checkCategoryNameExist(name: string) : Promise<boolean> {
+    async checkCategoryNameExist(name: string): Promise<boolean> {
         const result = await this.categoryModel.findOne({
             where: {
                 categoryName: {
@@ -84,5 +88,35 @@ export class CategoriesService {
         })
 
         return result != null;
+    }
+
+    async deleteCategoryById(id: number): Promise<boolean> {
+        const checkCategoryExist = await this.checkCategoryExistById(id);
+        if (checkCategoryExist == true) {
+            // const checkProductExistInCategory = await this.productService.checkProductExistByCategoryId(id);
+            // if (checkProductExistInCategory == false) {
+            //     try {
+            //         await this.categoryModel.destroy({
+            //             where: {
+            //                 id: id
+            //             }
+            //         })
+            //         return true; 
+            //     } catch (error) {
+            //         throw error;
+            //     }
+            // } 
+        } 
+        return false;
+    }
+
+    async checkCategoryExistById(id: number): Promise<boolean> {
+        const result = await this.categoryModel.count({
+            where: {
+                id: id
+            }
+        })
+
+        return result > 0;
     }
 }

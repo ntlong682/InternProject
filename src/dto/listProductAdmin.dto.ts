@@ -3,8 +3,8 @@ export class ListProductAdminDTO {
     productName: string;
     price: number;
     // oldPrice: number;
-    color: string;
+    // color: string;
     quantity: number;
     categoryName: string;
-    // coverImgPath: string;
+    coverImgPath: string;
 }
