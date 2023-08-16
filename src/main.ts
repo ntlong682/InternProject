@@ -14,6 +14,7 @@ async function bootstrap() {
   // app.useStaticAssets(join(__dirname, '..', 'online-shop', 'files'), {
   //   prefix: '/files', // Set the prefix for the static asset URLs
   // });
+  app.use('/files', express.static('files'));
   app.enableCors();
   app.useGlobalPipes(new ValidationPipe({transform: true, whitelist: true}));
   // app.useGlobalFilters(new FileValidationExceptionFilter(app.get(ProductService)));
