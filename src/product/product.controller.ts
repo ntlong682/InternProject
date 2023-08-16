@@ -228,8 +228,7 @@ export class ProductController {
         if (files.Images == null || files.Images.length == 0) {
             flag = false;
         }
-        if (await this.colorService.checkColorExist(body.colorId) == false
-            || await this.categoriesService.checkCategoryId(body.categoryId) == false) {
+        if (await this.categoriesService.checkCategoryId(body.categoryId) == false) {
             flag = false;
         }
         if (flag == true) {

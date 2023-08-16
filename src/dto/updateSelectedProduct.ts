@@ -41,13 +41,13 @@ export class UpdateSelectedProductDTO {
     @IsNumberString()
     weight: number
 
-    @IsNotEmpty()
-    @IsNumberString()
-    colorId: number
+    // @IsNotEmpty()
+    // @IsNumberString()
+    // colorId: number
 
-    @IsNotEmpty()
-    @IsNumberString()
-    quantity: number
+    // @IsNotEmpty()
+    // @IsNumberString()
+    // quantity: number
 
     // @IsNotEmpty()
     // coverImage: Express.Multer.File[]; // Array of uploaded files

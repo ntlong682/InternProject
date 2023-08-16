@@ -271,23 +271,23 @@ export class ProductService {
 
 
             //Fix lai update
-            // const selectedProduct: GetUpdateProductDTO = {
-            //     id: result.id,
-            //     name: result.name,
-            //     price: result.price,
-            //     oldprice: result.oldPrice,
-            //     categoryId: result.category_id,
-            //     cpu: result.productDetails.cpuName,
-            //     ram: result.productDetails.ram,
-            //     rom: result.productDetails.rom,
-            //     screen: result.productDetails.screen,
-            //     weight: result.productDetails.color_id,
-            //     colorId: result.productDetails.color_id,
-            //     quantity: result.productDetails.quantity,
-            //     coverImg: coverImgUrl,
-            //     imgList: imgDataList
-            // };
-            // return selectedProduct;
+            const selectedProduct: GetUpdateProductDTO = {
+                id: result.id,
+                name: result.name,
+                price: result.price,
+                oldprice: result.oldPrice,
+                categoryId: result.category_id,
+                cpu: result.productDetails[0].cpuName,
+                ram: result.productDetails[0].ram,
+                rom: result.productDetails[0].rom,
+                screen: result.productDetails[0].screen,
+                weight: result.productDetails[0].color_id,
+                colorId: result.productDetails[0].color_id, //sau bo color di
+                quantity: result.productDetails[0].quantity, // bo quantity di
+                coverImg: coverImgUrl,
+                imgList: imgDataList
+            };
+            return selectedProduct;
         }
 
         return null;
@@ -312,8 +312,8 @@ export class ProductService {
                 ram: updateDTO.ram,
                 rom: updateDTO.rom,
                 weight: updateDTO.weight,
-                color_id: updateDTO.colorId,
-                quantity: updateDTO.quantity
+                // color_id: updateDTO.colorId, //sau bo color di
+                // quantity: updateDTO.quantity //bo ca quantity nua, tach ra 1 cai update rieng
             }, {
                 where: {
                     product_id: updateDTO.id
