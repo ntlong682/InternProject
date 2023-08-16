@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
+import { Op } from "sequelize";
 import { Sequelize } from "sequelize-typescript";
 import { Categories } from "src/models/categories.model";
 
@@ -55,5 +56,33 @@ export class CategoriesService {
         })
 
         return category != null;
+    }
+
+    async createCategory(name: string) : Promise<boolean> {
+        const checkNameExist = await this.checkCategoryNameExist(name);
+        if(checkNameExist != true) {
+            try {
+                await this.categoryModel.create({
+                    categoryName: name
+                });
+                return true;
+            } catch (error) {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    async checkCategoryNameExist(name: string) : Promise<boolean> {
+        const result = await this.categoryModel.findOne({
+            where: {
+                categoryName: {
+                    [Op.iLike]: name
+                }
+            }
+        })
+
+        return result != null;
     }
 }

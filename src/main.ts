@@ -16,7 +16,7 @@ async function bootstrap() {
   // });
   app.enableCors();
   app.useGlobalPipes(new ValidationPipe({transform: true, whitelist: true}));
-  app.useGlobalFilters(new FileValidationExceptionFilter(app.get(ProductService)));
+  // app.useGlobalFilters(new FileValidationExceptionFilter(app.get(ProductService)));
   await app.listen(3000);
 }
 bootstrap();

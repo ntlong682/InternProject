@@ -1,6 +1,7 @@
-import { Controller, Post, Param, Query, Req, Body, Get } from '@nestjs/common';
+import { Controller, Post, Param, Query, Req, Body, Get, UseGuards } from '@nestjs/common';
 import { ColorService } from './color.service';
 import { Color } from 'src/models/color.model';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('color')
 export class ColorController{
@@ -13,6 +14,7 @@ export class ColorController{
     }
 
     // http://localhost:3000/color/create
+    @UseGuards(AuthGuard)
     @Post('create')
     async createColor(@Query('color') color:string): Promise<string> {
         return this.colorService.createColor(color);
