@@ -8,6 +8,7 @@ export class ColorController{
     constructor(private readonly colorService: ColorService){}
 
     // http://localhost:3000/color/list
+    @UseGuards(AuthGuard)
     @Get('list')
     async listColor() : Promise<Color[]> {
         return this.colorService.findAll();
