@@ -279,12 +279,12 @@ export class ProductController {
 
     @Get('home')
     async getListProductHomePage(): Promise<{ status, message, data }> {
-
-
+        const data = await this.productService.getProductsForHomePage();
+        console.log(data);
         return {
-            status: '',
-            message: '',
-            data: ''
+            status: true.valueOf(),
+            message: 'Lấy sản phẩm thành công',
+            data: data
         }
     }
 

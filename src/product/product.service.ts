@@ -17,6 +17,7 @@ import { GetUpdateProductDTO } from 'src/dto/updateProduct.dto';
 import * as fs from 'fs';
 import { error } from 'console';
 import { UpdateSelectedProductDTO } from 'src/dto/updateSelectedProduct';
+import { HomeProductDTO } from 'src/dto/homeProduct.dto';
 
 
 @Injectable()
@@ -139,7 +140,7 @@ export class ProductService {
                             [Op.startsWith]: 'Cover'
                         }
                     }
-                }, 
+                },
                 {
                     model: ProductDetails
                 }
@@ -196,7 +197,7 @@ export class ProductService {
         if (products != null) {
             let result: ListProductAdminDTO[] = [];
 
-            for(const p of Object.values(products)) {
+            for (const p of Object.values(products)) {
                 const color = await this.colorService.findColorById(p.productDetails.color_id);
                 const newProductDTO: ListProductAdminDTO = {
                     id: p.id,
@@ -349,8 +350,132 @@ export class ProductService {
         }
     }
 
-    async findAllProductByCategory(categoryId: number) {
+    async findAllProductByCategory(categoryId: number): Promise<Product[]> {
+        let result: Product[] = [];
+        result = await this.productModel.findAll({
+            include: [
+                {
+                    model: ProductDetails,
+                    where: {
+                        quantity: {
+                            [Op.gt]: 0
+                        }
+                    }
+                }, {
+                    model: Image,
+                    where: {
+                        imgName: {
+                            [Op.startsWith] : 'Cover'
+                        }
+                    }
+                }], where: {
+                    category_id: categoryId
+                }
+        })
 
+        return result;
+    }
+
+    async findAllAvaiableProduct(): Promise<Product[]> {
+        let result: Product[] = [];
+        result = await this.productModel.findAll({
+            include: [
+                {
+                    model: ProductDetails,
+                    where: {
+                        quantity: {
+                            [Op.gt]: 0
+                        }
+                    }
+                }, {
+                    model: Image,
+                    where: {
+                        imgName: {
+                            [Op.startsWith] : 'Cover'
+                        }
+                    }
+                }]
+        })
+
+        return result;
+    }
+
+    async getProductsForHomePage() : Promise<any> {
+
+        const allProducts = await this.findAllAvaiableProduct();
+        let products: HomeProductDTO[]= [];
+        for(const p of Object.values(allProducts)) {
+            let temp: HomeProductDTO = {
+                id: p.id,
+                coverImg: p.imgList[0].imgUrl,
+                price: p.price,
+                oldPrice: p.oldPrice,
+                cpu: p.productDetails.cpuName,
+                screen: p.productDetails.screen,
+                ram: p.productDetails.ram,
+                rom: p.productDetails.rom,
+                weight: p.productDetails.weight
+            }
+            products.push(temp);
+        }
+
+        const laptopsProduct = await this.findAllProductByCategory(1);
+        let laptops: HomeProductDTO[]= [];
+        for(const p of Object.values(laptopsProduct)) {
+            let temp: HomeProductDTO = {
+                id: p.id,
+                coverImg: p.imgList[0].imgUrl,
+                price: p.price,
+                oldPrice: p.oldPrice,
+                cpu: p.productDetails.cpuName,
+                screen: p.productDetails.screen,
+                ram: p.productDetails.ram,
+                rom: p.productDetails.rom,
+                weight: p.productDetails.weight
+            }
+            laptops.push(temp);
+        }
+
+        const tabletsProduct = await this.findAllProductByCategory(2);
+        let tablets: HomeProductDTO[]= [];
+        for(const p of Object.values(tabletsProduct)) {
+            let temp: HomeProductDTO = {
+                id: p.id,
+                coverImg: p.imgList[0].imgUrl,
+                price: p.price,
+                oldPrice: p.oldPrice,
+                cpu: p.productDetails.cpuName,
+                screen: p.productDetails.screen,
+                ram: p.productDetails.ram,
+                rom: p.productDetails.rom,
+                weight: p.productDetails.weight
+            }
+            tablets.push(temp);
+        }
+
+        const phonesProduct = await this.findAllProductByCategory(3);
+        let phones: HomeProductDTO[]= [];
+        for(const p of Object.values(phonesProduct)) {
+            let temp: HomeProductDTO = {
+                id: p.id,
+                coverImg: p.imgList[0].imgUrl,
+                price: p.price,
+                oldPrice: p.oldPrice,
+                cpu: p.productDetails.cpuName,
+                screen: p.productDetails.screen,
+                ram: p.productDetails.ram,
+                rom: p.productDetails.rom,
+                weight: p.productDetails.weight
+            }
+            phones.push(temp);
+        }
+
+        return {
+            products: products,
+            laptops: laptops,
+            tablets: tablets,
+            phones: phones
+        }
     }
 
 
