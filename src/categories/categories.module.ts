@@ -5,6 +5,9 @@ import { SequelizeModule } from "@nestjs/sequelize";
 import { Categories } from "src/models/categories.model";
 import { AuthGuard } from "src/auth/auth.guard";
 import { JwtService } from "@nestjs/jwt";
+import { ProductService } from "src/product/product.service";
+import { ProductModule } from "src/product/product.module";
+import { Product } from "src/models/product.model";
 
 
 
@@ -12,6 +15,7 @@ import { JwtService } from "@nestjs/jwt";
     imports: [SequelizeModule.forFeature([Categories])],
     providers: [CategoriesService, AuthGuard, JwtService],
     controllers: [CategoriesController],
+    exports: [CategoriesService]
 })
 export class CategoriesModule {    
 }

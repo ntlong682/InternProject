@@ -21,9 +21,9 @@ export class GetUpdateProductDTO {
 
     weight : number
 
-    colorId : number
+    // colorId : number
 
-    quantity : number
+    // quantity : number
 
     coverImg: string
 

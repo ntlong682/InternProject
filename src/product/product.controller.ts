@@ -275,6 +275,24 @@ export class ProductController {
         }
     }
 
+    @Get('productdetails')
+    async getProductDetails(@Query('id') productId: number) : Promise<{status, message, data}> {
+        const result = await this.productService.getProductDetailsByProductId(+productId);
+        if(result != null) {
+            return {
+                status: true.valueOf(),
+                message: 'Xem chi tiết sản phẩm thành công',
+                data: result
+            }
+        } else {
+            return {
+                status: false.valueOf(),
+                message: 'Xem chi tiết sản phẩm thất bại',
+                data: null
+            }
+        }
+    }
+
 
     @Get('home')
     async getListProductHomePage(): Promise<{ status, message, data }> {

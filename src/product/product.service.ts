@@ -1,4 +1,3 @@
-
 import { Image } from 'src/models/image.model';
 import { Injectable, UseInterceptors, UploadedFiles } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
@@ -18,6 +17,9 @@ import * as fs from 'fs';
 import { error } from 'console';
 import { UpdateSelectedProductDTO } from 'src/dto/updateSelectedProduct';
 import { HomeProductDTO } from 'src/dto/homeProduct.dto';
+import { ViewProductDetailDTO } from 'src/dto/viewProductDetail.dto';
+import { ProductMetaDataDTO } from 'src/dto/productMetadata.dto';
+import { Color } from 'src/models/color.model';
 
 
 @Injectable()
@@ -27,7 +29,7 @@ export class ProductService {
         private productModel: typeof Product,
         @InjectModel(ProductDetails)
         private productDetailsModel: typeof ProductDetails,
-        private sequelize: Sequelize,
+        // private sequelize: Sequelize,
         private readonly categoriesService: CategoriesService,
         private readonly colorService: ColorService,
         private readonly imageService: ImageService,
@@ -229,16 +231,6 @@ export class ProductService {
         return null;
     }
 
-    // async converImgToBase64(imgPath: string) : Promise<string> {
-    //     let result: string = '';
-    //     await imageToBase64(imgPath).then((result) => {
-    //         result = result;
-    //     }).catch((err) => {
-    //         throw err;
-    //     });
-    //     return result;
-    // }
-
     async getSelectedProduct(id: number): Promise<GetUpdateProductDTO> {
         const result = await this.findProductUpdateById(id);
         if (result != null) {
@@ -282,8 +274,8 @@ export class ProductService {
                 rom: result.productDetails[0].rom,
                 screen: result.productDetails[0].screen,
                 weight: result.productDetails[0].color_id,
-                colorId: result.productDetails[0].color_id, //sau bo color di
-                quantity: result.productDetails[0].quantity, // bo quantity di
+                // colorId: result.productDetails[0].color_id, //sau bo color di
+                // quantity: result.productDetails[0].quantity, // bo quantity di
                 coverImg: coverImgUrl,
                 imgList: imgDataList
             };
@@ -502,6 +494,79 @@ export class ProductService {
 
         return result > 0
 
+    }
+
+    async findProductDataById(productId: number): Promise<Product> {
+        const product = await this.productModel.findOne({
+            include: [
+                {
+                    model: Categories
+                },
+                {
+                    model: Image
+                },
+                {
+                    model: ProductDetails,
+                    include: [Color]
+                }
+            ], where: {
+                id: productId
+            }
+        })
+        // console.log(product);
+
+        return product;
+    }
+
+
+    async getProductDetailsByProductId(productId: number) : Promise<ViewProductDetailDTO> {
+        const product = await this.findProductDataById(productId);
+        if(product != null) {
+            let metaDatas: ProductMetaDataDTO[] = [];
+            let totalQuantity = 0
+            for(const pd of Object.values(product.productDetails)) {
+                let metaData: ProductMetaDataDTO = {
+                    productDetailId: pd.id,
+                    colorId: pd.color_id,
+                    colorName: pd.color.name,
+                    quantity: pd.quantity
+                }
+                totalQuantity += pd.quantity;
+                metaDatas.push(metaData);
+            }
+            let coverImg: string;
+            let imgList: string[] = [];
+            for(const img of Object.values(product.imgList)) {
+                if(img.imgName.startsWith('Cover') == true) {
+                    coverImg = img.imgUrl;
+                } else {
+                    imgList.push(img.imgUrl);
+                }
+            }
+    
+            let productDetailDTO: ViewProductDetailDTO = {
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                oldPrice: product.oldPrice,
+                categoryName: product.category.categoryName,
+                cpuName: product.productDetails[0].cpuName,
+                screen: product.productDetails[0].screen,
+                ram: product.productDetails[0].ram,
+                rom: product.productDetails[0].rom,
+                weight: product.productDetails[0].weight,
+                totalQuantity: totalQuantity,
+                coverImg: coverImg,
+                imagesList: imgList,
+                metaData: metaDatas
+            }
+    
+    
+            return productDetailDTO;
+        } else {
+            return null;
+        }
+        
     }
 
 }
