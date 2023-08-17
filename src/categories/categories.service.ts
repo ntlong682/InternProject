@@ -1,8 +1,9 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, forwardRef } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import { Op } from "sequelize";
 import { Sequelize } from "sequelize-typescript";
 import { Categories } from "src/models/categories.model";
+import { Product } from "src/models/product.model";
 import { ProductService } from "src/product/product.service";
 
 
@@ -11,7 +12,11 @@ export class CategoriesService {
     constructor(
         @InjectModel(Categories)
         private categoryModel: typeof Categories,
-        private sequelize: Sequelize
+        @InjectModel(Product)
+        private productModel: typeof Product,
+        private sequelize: Sequelize,
+        // @Inject(forwardRef(() => ProductService))
+        // private productService: ProductService
     ) { }
 
     // @Inject(ProductService)
@@ -93,21 +98,32 @@ export class CategoriesService {
     async deleteCategoryById(id: number): Promise<boolean> {
         const checkCategoryExist = await this.checkCategoryExistById(id);
         if (checkCategoryExist == true) {
-            // const checkProductExistInCategory = await this.productService.checkProductExistByCategoryId(id);
-            // if (checkProductExistInCategory == false) {
-            //     try {
-            //         await this.categoryModel.destroy({
-            //             where: {
-            //                 id: id
-            //             }
-            //         })
-            //         return true; 
-            //     } catch (error) {
-            //         throw error;
-            //     }
-            // } 
+            const checkProductExistInCategory = await this.checkProductExistByCategoryId(id);
+            if (checkProductExistInCategory == false) {
+                try {
+                    await this.categoryModel.destroy({
+                        where: {
+                            id: id
+                        }
+                    })
+                    return true; 
+                } catch (error) {
+                    throw error;
+                }
+            } 
         } 
         return false;
+    }
+
+    async checkProductExistByCategoryId(categoryId: number) : Promise<boolean> {
+        const result = await this.productModel.count({
+            where: {
+                category_id: categoryId
+            }
+        })
+
+        return result > 0
+
     }
 
     async checkCategoryExistById(id: number): Promise<boolean> {

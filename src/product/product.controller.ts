@@ -10,6 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { CategoriesService } from "src/categories/categories.service";
 import { UpdateSelectedProductDTO } from "src/dto/updateSelectedProduct";
 import { validate } from "class-validator";
+import { AddProductMetaData } from "src/dto/addProductMetaData.dto";
 
 @Controller('product')
 export class ProductController {
@@ -275,6 +276,7 @@ export class ProductController {
         }
     }
 
+    @UseGuards(AuthGuard)
     @Get('productdetails')
     async getProductDetails(@Query('id') productId: number) : Promise<{status, message, data}> {
         const result = await this.productService.getProductDetailsByProductId(+productId);
@@ -293,6 +295,41 @@ export class ProductController {
         }
     }
 
+    @UseGuards(AuthGuard)
+    @Get('add-product-metadata')
+    async getAddProductMetadata() : Promise<{status, message, data}> {
+        const result = await this.productService.getDataForAddMetaData();
+        if(result != null && result.length > 0) {
+            return {
+                status: true.valueOf(),
+                message: 'Load thông tin thành công',
+                data: result
+            }
+        } else {
+            return {
+                status: true.valueOf(),
+                message: 'Load thông tin thành công',
+                data: null
+            }
+        }
+    }
+
+    @UseGuards(AuthGuard)
+    @Post('add-product-metadata')
+    async addProductMetadata(@Body() body : AddProductMetaData) : Promise<{status, message}> {
+        const result = await this.productService.addMetaDataForProduct(body);
+        if(result == true) {
+            return {
+                status: true.valueOf(),
+                message: 'Thêm thông tin sản phẩm thành công'
+            }
+        } else {
+            return {
+                status: false.valueOf(),
+                message: 'Thêm thông tin sản phẩm thất bại'
+            }
+        }
+    }
 
     @Get('home')
     async getListProductHomePage(): Promise<{ status, message, data }> {

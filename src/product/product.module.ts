@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { Module, forwardRef } from "@nestjs/common";
 import { ProductController } from "./product.controller";
 import { ProductService } from "./product.service";
 import { SequelizeModule } from "@nestjs/sequelize";
@@ -15,7 +15,6 @@ import { JwtService } from "@nestjs/jwt";
 import { OrderService } from "src/order/order.service";
 import { Order } from "src/models/order.model";
 import { OrderDetails } from "src/models/orderdetails.model";
-import { CategoriesModule } from "src/categories/categories.module";
 @Module({
     imports: [SequelizeModule.forFeature([Product, ProductDetails, Categories, Color, Image, Order, OrderDetails])],
     providers: [ProductService, CategoriesService, ColorService, ImageService, OrderService, AuthGuard, JwtService],

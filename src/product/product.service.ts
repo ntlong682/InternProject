@@ -1,5 +1,5 @@
 import { Image } from 'src/models/image.model';
-import { Injectable, UseInterceptors, UploadedFiles } from "@nestjs/common";
+import { Injectable, UseInterceptors, UploadedFiles, Inject, forwardRef } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import { Sequelize } from "sequelize-typescript";
 import { CategoriesService } from "src/categories/categories.service";
@@ -20,6 +20,7 @@ import { HomeProductDTO } from 'src/dto/homeProduct.dto';
 import { ViewProductDetailDTO } from 'src/dto/viewProductDetail.dto';
 import { ProductMetaDataDTO } from 'src/dto/productMetadata.dto';
 import { Color } from 'src/models/color.model';
+import { AddProductMetaData } from 'src/dto/addProductMetaData.dto';
 
 
 @Injectable()
@@ -30,6 +31,7 @@ export class ProductService {
         @InjectModel(ProductDetails)
         private productDetailsModel: typeof ProductDetails,
         // private sequelize: Sequelize,
+        // @Inject(forwardRef(() => CategoriesService))
         private readonly categoriesService: CategoriesService,
         private readonly colorService: ColorService,
         private readonly imageService: ImageService,
@@ -208,7 +210,7 @@ export class ProductService {
                 })
                 let totalQuantity = 0
 
-                for(const pd of Object.values(productDetails)) {
+                for (const pd of Object.values(productDetails)) {
                     totalQuantity += pd.quantity;
                 }
 
@@ -370,7 +372,7 @@ export class ProductService {
                     model: Image,
                     where: {
                         imgName: {
-                            [Op.startsWith] : 'Cover'
+                            [Op.startsWith]: 'Cover'
                         }
                     }
                 }], where: {
@@ -396,7 +398,7 @@ export class ProductService {
                     model: Image,
                     where: {
                         imgName: {
-                            [Op.startsWith] : 'Cover'
+                            [Op.startsWith]: 'Cover'
                         }
                     }
                 }]
@@ -407,11 +409,11 @@ export class ProductService {
 
 
     //Fix lai sau, fix update Product truoc
-    async getProductsForHomePage() : Promise<any> {
+    async getProductsForHomePage(): Promise<any> {
 
         const allProducts = await this.findAllAvaiableProduct();
-        let products: HomeProductDTO[]= [];
-        for(const p of Object.values(allProducts)) {
+        let products: HomeProductDTO[] = [];
+        for (const p of Object.values(allProducts)) {
             let temp: HomeProductDTO = {
                 id: p.id,
                 coverImg: p.imgList[0].imgUrl,
@@ -427,8 +429,8 @@ export class ProductService {
         }
 
         const laptopsProduct = await this.findAllProductByCategory(1);
-        let laptops: HomeProductDTO[]= [];
-        for(const p of Object.values(laptopsProduct)) {
+        let laptops: HomeProductDTO[] = [];
+        for (const p of Object.values(laptopsProduct)) {
             let temp: HomeProductDTO = {
                 id: p.id,
                 coverImg: p.imgList[0].imgUrl,
@@ -444,8 +446,8 @@ export class ProductService {
         }
 
         const tabletsProduct = await this.findAllProductByCategory(2);
-        let tablets: HomeProductDTO[]= [];
-        for(const p of Object.values(tabletsProduct)) {
+        let tablets: HomeProductDTO[] = [];
+        for (const p of Object.values(tabletsProduct)) {
             let temp: HomeProductDTO = {
                 id: p.id,
                 coverImg: p.imgList[0].imgUrl,
@@ -461,8 +463,8 @@ export class ProductService {
         }
 
         const phonesProduct = await this.findAllProductByCategory(3);
-        let phones: HomeProductDTO[]= [];
-        for(const p of Object.values(phonesProduct)) {
+        let phones: HomeProductDTO[] = [];
+        for (const p of Object.values(phonesProduct)) {
             let temp: HomeProductDTO = {
                 id: p.id,
                 coverImg: p.imgList[0].imgUrl,
@@ -485,7 +487,7 @@ export class ProductService {
         }
     }
 
-    async checkProductExistByCategoryId(categoryId: number) : Promise<boolean> {
+    async checkProductExistByCategoryId(categoryId: number): Promise<boolean> {
         const result = await this.productModel.count({
             where: {
                 category_id: categoryId
@@ -519,12 +521,12 @@ export class ProductService {
     }
 
 
-    async getProductDetailsByProductId(productId: number) : Promise<ViewProductDetailDTO> {
+    async getProductDetailsByProductId(productId: number): Promise<ViewProductDetailDTO> {
         const product = await this.findProductDataById(productId);
-        if(product != null) {
+        if (product != null) {
             let metaDatas: ProductMetaDataDTO[] = [];
             let totalQuantity = 0
-            for(const pd of Object.values(product.productDetails)) {
+            for (const pd of Object.values(product.productDetails)) {
                 let metaData: ProductMetaDataDTO = {
                     productDetailId: pd.id,
                     colorId: pd.color_id,
@@ -536,14 +538,14 @@ export class ProductService {
             }
             let coverImg: string;
             let imgList: string[] = [];
-            for(const img of Object.values(product.imgList)) {
-                if(img.imgName.startsWith('Cover') == true) {
+            for (const img of Object.values(product.imgList)) {
+                if (img.imgName.startsWith('Cover') == true) {
                     coverImg = img.imgUrl;
                 } else {
                     imgList.push(img.imgUrl);
                 }
             }
-    
+
             let productDetailDTO: ViewProductDetailDTO = {
                 id: product.id,
                 name: product.name,
@@ -560,13 +562,44 @@ export class ProductService {
                 imagesList: imgList,
                 metaData: metaDatas
             }
-    
-    
+
+
             return productDetailDTO;
         } else {
             return null;
         }
-        
+
+    }
+
+    async getDataForAddMetaData(): Promise<Color[]> {
+        return this.colorService.findAll();
+    }
+
+    // async updateProductDetail(product: Product) {
+
+    // }
+
+    async addMetaDataForProduct(data: AddProductMetaData): Promise<any> {
+        const product = await this.findProductDataById(data.id);
+        if (product != null) {
+            const checkColor = await this.colorService.checkColorExist(data.color);
+            if (checkColor == true) {
+                const flag = await this.createProductDetails(product.productDetails[0].cpuName,
+                    product.productDetails[0].screen,
+                    product.productDetails[0].ram,
+                    product.productDetails[0].rom,
+                    product.productDetails[0].weight,
+                    data.color,
+                    data.quantity,
+                    product.id);
+                if (flag == true) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        }
+        return false;
     }
 
 }
