@@ -416,6 +416,7 @@ export class ProductService {
         for (const p of Object.values(allProducts)) {
             let temp: HomeProductDTO = {
                 id: p.id,
+                name: p.name,
                 coverImg: p.imgList[0].imgUrl,
                 price: p.price,
                 oldPrice: p.oldPrice,
@@ -433,6 +434,7 @@ export class ProductService {
         for (const p of Object.values(laptopsProduct)) {
             let temp: HomeProductDTO = {
                 id: p.id,
+                name: p.name,
                 coverImg: p.imgList[0].imgUrl,
                 price: p.price,
                 oldPrice: p.oldPrice,
@@ -450,6 +452,7 @@ export class ProductService {
         for (const p of Object.values(tabletsProduct)) {
             let temp: HomeProductDTO = {
                 id: p.id,
+                name: p.name,
                 coverImg: p.imgList[0].imgUrl,
                 price: p.price,
                 oldPrice: p.oldPrice,
@@ -467,6 +470,7 @@ export class ProductService {
         for (const p of Object.values(phonesProduct)) {
             let temp: HomeProductDTO = {
                 id: p.id,
+                name: p.name,
                 coverImg: p.imgList[0].imgUrl,
                 price: p.price,
                 oldPrice: p.oldPrice,
@@ -600,6 +604,77 @@ export class ProductService {
             }
         }
         return false;
+    }
+
+
+    async deleteMetaDataForProduct(productId: number, productDetailId: number) : Promise<boolean> {
+        const countMetaData = await this.productDetailsModel.count({where: {
+            product_id: productId
+        }});
+        if(countMetaData > 1) {
+            try {
+                const result = await this.productDetailsModel.destroy({where: {
+                    id: productDetailId
+                }});
+                return result > 0;
+            } catch (error) {
+                return false;
+            }
+        } 
+
+        return false;
+    }
+
+    async findProductsByName(searchStr: string) : Promise<Product[]> {
+        const result = await this.productModel.findAll({
+            include: [
+                {
+                    model: Categories
+                },
+                {
+                    model: Image,
+                    where: {
+                        imgName: {
+                            [Op.startsWith]: 'Cover'
+                        }
+                    }
+                },
+                {
+                    model: ProductDetails
+                }
+            ], where: {
+                name: {
+                    [Op.iLike]: "%" + searchStr + "%"
+                }
+            }
+        })
+
+        return result;
+    }
+
+    async searchProductByName(searchStr: string) : Promise<HomeProductDTO[]> {
+        let result: HomeProductDTO[] = [];
+        const products = await this.findProductsByName(searchStr);
+
+        for(const p of Object.values(products)) {
+            const dto: HomeProductDTO = {
+                id: p.id,
+                name: p.name,
+                coverImg: p.imgList[0].imgUrl,
+                price: p.price,
+                oldPrice: p.oldPrice,
+                cpu: p.productDetails[0].cpuName,
+                screen: p.productDetails[0].screen,
+                ram: p.productDetails[0].ram,
+                rom: p.productDetails[0].rom,
+                weight: p.productDetails[0].weight
+            }
+
+            result.push(dto);
+        }
+
+        // console.log(products);
+        return result;
     }
 
 }

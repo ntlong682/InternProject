@@ -1,4 +1,4 @@
-import { Controller, Get, Post, UploadedFiles, UseInterceptors, Query, Body, UseGuards, Delete, Res, UsePipes, ValidationPipe } from "@nestjs/common";
+import { Controller, Get, Post, UploadedFiles, Put, UseInterceptors, Query, Body, UseGuards, Delete, Res, UsePipes, ValidationPipe } from "@nestjs/common";
 import { ProductService } from "./product.service";
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { diskStorage } from "multer";
@@ -278,9 +278,9 @@ export class ProductController {
 
     @UseGuards(AuthGuard)
     @Get('productdetails')
-    async getProductDetails(@Query('id') productId: number) : Promise<{status, message, data}> {
+    async getProductDetails(@Query('id') productId: number): Promise<{ status, message, data }> {
         const result = await this.productService.getProductDetailsByProductId(+productId);
-        if(result != null) {
+        if (result != null) {
             return {
                 status: true.valueOf(),
                 message: 'Xem chi tiết sản phẩm thành công',
@@ -297,9 +297,9 @@ export class ProductController {
 
     @UseGuards(AuthGuard)
     @Get('add-product-metadata')
-    async getAddProductMetadata() : Promise<{status, message, data}> {
+    async getAddProductMetadata(): Promise<{ status, message, data }> {
         const result = await this.productService.getDataForAddMetaData();
-        if(result != null && result.length > 0) {
+        if (result != null && result.length > 0) {
             return {
                 status: true.valueOf(),
                 message: 'Load thông tin thành công',
@@ -316,9 +316,9 @@ export class ProductController {
 
     @UseGuards(AuthGuard)
     @Post('add-product-metadata')
-    async addProductMetadata(@Body() body : AddProductMetaData) : Promise<{status, message}> {
+    async addProductMetadata(@Body() body: AddProductMetaData): Promise<{ status, message }> {
         const result = await this.productService.addMetaDataForProduct(body);
-        if(result == true) {
+        if (result == true) {
             return {
                 status: true.valueOf(),
                 message: 'Thêm thông tin sản phẩm thành công'
@@ -331,10 +331,43 @@ export class ProductController {
         }
     }
 
+    @UseGuards(AuthGuard)
+    @Delete('delete-product-metadata')
+    async deleteProductMetaData(@Query('productId') productId: number, @Query('productDetailsId') productDetailsId: number):
+        Promise<{ status, message }> {
+        const result = await this.productService.deleteMetaDataForProduct(productId, productDetailsId);
+
+        if (result == true) {
+            return {
+                status: result.valueOf(),
+                message: 'Xóa thành công'
+            }
+        } else {
+            return {
+                status: result.valueOf(),
+                message: 'Xóa thất bại'
+            }
+        }
+
+    }
+
+    @Post('search')
+    async searchProduct(@Query('searchString') searchStr: string) {
+        const result = await this.productService.searchProductByName(searchStr);
+
+        return result;
+    }
+
+    // @UseGuards(AuthGuard)
+    // @Put('update-product-metadata')
+    // async updateProductMetaData() {
+
+    // }
+
     @Get('home')
     async getListProductHomePage(): Promise<{ status, message, data }> {
         const data = await this.productService.getProductsForHomePage();
-        console.log(data);
+        // console.log(data);
         return {
             status: true.valueOf(),
             message: 'Lấy sản phẩm thành công',

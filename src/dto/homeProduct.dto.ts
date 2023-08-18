@@ -1,5 +1,6 @@
 export class HomeProductDTO {
     id: number;
+    name: string;
     coverImg: string;
     price: number;
     oldPrice: number;
