@@ -148,6 +148,9 @@ export class ProductService {
                 {
                     model: ProductDetails
                 }
+            ],
+            order: [
+                ['id', 'ASC']
             ]
         });
         if (products.length != 0) {
