@@ -414,6 +414,7 @@ export class ProductService {
     //Fix lai sau, fix update Product truoc
     async getProductsForHomePage(): Promise<any> {
 
+        const categories = await this.categoriesService.findAll();
         const allProducts = await this.findAllAvaiableProduct();
         let products: HomeProductDTO[] = [];
         for (const p of Object.values(allProducts)) {
@@ -431,66 +432,86 @@ export class ProductService {
             }
             products.push(temp);
         }
-
-        const laptopsProduct = await this.findAllProductByCategory(1);
-        let laptops: HomeProductDTO[] = [];
-        for (const p of Object.values(laptopsProduct)) {
-            let temp: HomeProductDTO = {
-                id: p.id,
-                name: p.name,
-                coverImg: p.imgList[0].imgUrl,
-                price: p.price,
-                oldPrice: p.oldPrice,
-                cpu: p.productDetails[0].cpuName,
-                screen: p.productDetails[0].screen,
-                ram: p.productDetails[0].ram,
-                rom: p.productDetails[0].rom,
-                weight: p.productDetails[0].weight
+        const data: any[] = [];
+        for(const category of Object.values(categories)) {
+            const temps: HomeProductDTO[]= [];
+            const tempProducts = await this.findAllProductByCategory(category.id);
+            for (const p of Object.values(tempProducts)) {
+                let temp: HomeProductDTO = {
+                    id: p.id,
+                    name: p.name,
+                    coverImg: p.imgList[0].imgUrl,
+                    price: p.price,
+                    oldPrice: p.oldPrice,
+                    cpu: p.productDetails[0].cpuName,
+                    screen: p.productDetails[0].screen,
+                    ram: p.productDetails[0].ram,
+                    rom: p.productDetails[0].rom,
+                    weight: p.productDetails[0].weight
+                }
+                temps.push(temp);
             }
-            laptops.push(temp);
+            data.push({category: category.categoryName, products: temps});
         }
 
-        const tabletsProduct = await this.findAllProductByCategory(2);
-        let tablets: HomeProductDTO[] = [];
-        for (const p of Object.values(tabletsProduct)) {
-            let temp: HomeProductDTO = {
-                id: p.id,
-                name: p.name,
-                coverImg: p.imgList[0].imgUrl,
-                price: p.price,
-                oldPrice: p.oldPrice,
-                cpu: p.productDetails[0].cpuName,
-                screen: p.productDetails[0].screen,
-                ram: p.productDetails[0].ram,
-                rom: p.productDetails[0].rom,
-                weight: p.productDetails[0].weight
-            }
-            tablets.push(temp);
-        }
+        // const laptopsProduct = await this.findAllProductByCategory(1);
+        // let laptops: HomeProductDTO[] = [];
+        // for (const p of Object.values(laptopsProduct)) {
+        //     let temp: HomeProductDTO = {
+        //         id: p.id,
+        //         name: p.name,
+        //         coverImg: p.imgList[0].imgUrl,
+        //         price: p.price,
+        //         oldPrice: p.oldPrice,
+        //         cpu: p.productDetails[0].cpuName,
+        //         screen: p.productDetails[0].screen,
+        //         ram: p.productDetails[0].ram,
+        //         rom: p.productDetails[0].rom,
+        //         weight: p.productDetails[0].weight
+        //     }
+        //     laptops.push(temp);
+        // }
 
-        const phonesProduct = await this.findAllProductByCategory(3);
-        let phones: HomeProductDTO[] = [];
-        for (const p of Object.values(phonesProduct)) {
-            let temp: HomeProductDTO = {
-                id: p.id,
-                name: p.name,
-                coverImg: p.imgList[0].imgUrl,
-                price: p.price,
-                oldPrice: p.oldPrice,
-                cpu: p.productDetails[0].cpuName,
-                screen: p.productDetails[0].screen,
-                ram: p.productDetails[0].ram,
-                rom: p.productDetails[0].rom,
-                weight: p.productDetails[0].weight
-            }
-            phones.push(temp);
-        }
+        // const tabletsProduct = await this.findAllProductByCategory(2);
+        // let tablets: HomeProductDTO[] = [];
+        // for (const p of Object.values(tabletsProduct)) {
+        //     let temp: HomeProductDTO = {
+        //         id: p.id,
+        //         name: p.name,
+        //         coverImg: p.imgList[0].imgUrl,
+        //         price: p.price,
+        //         oldPrice: p.oldPrice,
+        //         cpu: p.productDetails[0].cpuName,
+        //         screen: p.productDetails[0].screen,
+        //         ram: p.productDetails[0].ram,
+        //         rom: p.productDetails[0].rom,
+        //         weight: p.productDetails[0].weight
+        //     }
+        //     tablets.push(temp);
+        // }
+
+        // const phonesProduct = await this.findAllProductByCategory(3);
+        // let phones: HomeProductDTO[] = [];
+        // for (const p of Object.values(phonesProduct)) {
+        //     let temp: HomeProductDTO = {
+        //         id: p.id,
+        //         name: p.name,
+        //         coverImg: p.imgList[0].imgUrl,
+        //         price: p.price,
+        //         oldPrice: p.oldPrice,
+        //         cpu: p.productDetails[0].cpuName,
+        //         screen: p.productDetails[0].screen,
+        //         ram: p.productDetails[0].ram,
+        //         rom: p.productDetails[0].rom,
+        //         weight: p.productDetails[0].weight
+        //     }
+        //     phones.push(temp);
+        // }
 
         return {
+            categories: categories,
             products: products,
-            laptops: laptops,
-            tablets: tablets,
-            phones: phones
+            data: data
         }
     }
 
