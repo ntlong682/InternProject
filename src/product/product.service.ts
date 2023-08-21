@@ -632,10 +632,11 @@ export class ProductService {
 
 
     async deleteMetaDataForProduct(productId: number, productDetailId: number) : Promise<boolean> {
+        const checkDetailsFromOrder = await this.orderService.checkProductDetailExistInOrder(productDetailId);
         const countMetaData = await this.productDetailsModel.count({where: {
             product_id: productId
         }});
-        if(countMetaData > 1) {
+        if(countMetaData > 1 && checkDetailsFromOrder == false) {
             try {
                 const result = await this.productDetailsModel.destroy({where: {
                     id: productDetailId

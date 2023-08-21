@@ -18,4 +18,14 @@ export class OrderService {
         })
         return result.count == 0;
     }
+
+    async checkProductDetailExistInOrder(productDetailsId: number) : Promise<boolean> {
+        const count = await this.orderDetailsModel.count({
+            where: {
+                productDetails_id: productDetailsId
+            }
+        })
+
+        return count > 0;
+    }
 }
