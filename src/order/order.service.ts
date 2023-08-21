@@ -43,20 +43,20 @@ export class OrderService {
     }
 
     async createOrderDetail(quantity: number, price: number, order_id: number,
-        product_id: number, productDetail_id: number) : Promise<OrderDetails> {
-            const result = await this.orderDetailsModel.create({
-                quantity: quantity,
-                price: price * quantity,
-                order_id: order_id,
-                product_id: product_id,
-                productDetails_id: productDetail_id
-            });
+        product_id: number, productDetail_id: number): Promise<OrderDetails> {
+        const result = await this.orderDetailsModel.create({
+            quantity: quantity,
+            price: price * quantity,
+            order_id: order_id,
+            product_id: product_id,
+            productDetails_id: productDetail_id
+        });
 
-            if(result != null) {
-                return result;
-            } else {
-                return null;
-            }
+        if (result != null) {
+            return result;
+        } else {
+            return null;
+        }
     }
 
     async createOrderForUser(customerOrder: CustomerOrderDTO): Promise<boolean> {
@@ -66,9 +66,9 @@ export class OrderService {
                 const uid = user.id;
                 const order = await this.createOrder(customerOrder.totalPrice, uid);
                 if (order != null) {
-                    for(const p of Object.values(customerOrder.listProduct)) {
+                    for (const p of Object.values(customerOrder.listProduct)) {
                         await this.createOrderDetail(p.quantity, p.price, order.id,
-                             p.productId, p.productDetailId);
+                            p.productId, p.productDetailId);
                     }
                     return true;
                 }
@@ -78,5 +78,19 @@ export class OrderService {
         }
 
         return false;
+    }
+
+    async listOrderForAdmin(): Promise<Order[]> {
+        const result = await this.orderModel.findAll({
+            include: [
+                {
+                    model: OrderDetails
+                }
+            ],
+            order: [
+                ['createdAt', 'DESC']
+            ]
+        });
+        return result;
     }
 }

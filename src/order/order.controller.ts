@@ -11,9 +11,25 @@ export class OrderController {
 
     @UseGuards(AuthGuard)
     @Get('list')
-    async listAllOrderAdmin() {
+    async listAllOrderAdmin(): Promise<{ status, message, data }> {
+        const result = await this.orderService.listOrderForAdmin();
 
+        if (result == null || result.length == 0) {
+            return {
+                status: false.valueOf(),
+                message: 'Load đơn hàng thất bại',
+                data: null
+            }
+        } else {
+            return {
+                status: true.valueOf(),
+                message: 'Load đơn hàng thành công',
+                data: result
+            }
+        }
     }
+
+
     // @UseGuards(AuthGuard)
     @Post('paynow')
     async createOrderPayNow() {
