@@ -2,7 +2,6 @@ import { Controller, Post, Param, Query, Req, Body, Get, UseGuards, Delete } fro
 import { ColorService } from './color.service';
 import { Color } from 'src/models/color.model';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { Auth } from 'googleapis';
 
 @Controller('color')
 export class ColorController{
