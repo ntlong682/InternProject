@@ -352,9 +352,43 @@ export class ProductController {
     }
 
     @UseGuards(AuthGuard)
-    @Put('update-product-metadata')
-    async updateProductMetaData() {
+    @Get('update-product-metadata')
+    async getUpdateProductMetaData(@Query('id') id: number) : Promise<{status, message, data}>{
+        const result = await this.productService.getSelectedProductMetadata(id);
 
+        if(result != null) {
+            return {
+                status: true.valueOf(),
+                message: 'Load data thành công',
+                data: result
+            }
+        } else {
+            return {
+                status: true.valueOf(),
+                message: 'Load data thất bại',
+                data: null
+            }
+        }
+    }
+
+    @UseGuards(AuthGuard)
+    @Put('update-product-metadata')
+    async updateProductMetaData(@Query('productDetailsId') productDetailsId: number,
+        @Query('colorId') colorId: number, @Query('quantity') quantity: number)
+        : Promise<{ status, message }> {
+        const result = await this.productService.updateMetaDataForProduct(productDetailsId,
+            colorId, quantity);
+        if (result == true) {
+            return {
+                status: true.valueOf(),
+                message: 'Cập nhật thông tin chi tiết sản phẩm thành công'
+            }
+        } else {
+            return {
+                status: true.valueOf(),
+                message: 'Cập nhật thông tin chi tiết sản phẩm thất bại'
+            }
+        }
     }
 
     @Post('search')

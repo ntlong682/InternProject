@@ -21,6 +21,7 @@ import { ViewProductDetailDTO } from 'src/dto/viewProductDetail.dto';
 import { ProductMetaDataDTO } from 'src/dto/productMetadata.dto';
 import { Color } from 'src/models/color.model';
 import { AddProductMetaData } from 'src/dto/addProductMetaData.dto';
+import { SelectedUpdateProductMetaData } from 'src/dto/selectedUpdateProductMetadata.dto';
 
 
 @Injectable()
@@ -435,8 +436,8 @@ export class ProductService {
             products.push(temp);
         }
         const data: any[] = [];
-        for(const category of Object.values(categories)) {
-            const temps: HomeProductDTO[]= [];
+        for (const category of Object.values(categories)) {
+            const temps: HomeProductDTO[] = [];
             const tempProducts = await this.findAllProductByCategory(category.id);
             for (const p of Object.values(tempProducts)) {
                 let temp: HomeProductDTO = {
@@ -455,7 +456,7 @@ export class ProductService {
                 }
                 temps.push(temp);
             }
-            data.push({category: category.categoryName, products: temps});
+            data.push({ category: category.categoryName, products: temps });
         }
 
         // const laptopsProduct = await this.findAllProductByCategory(1);
@@ -634,27 +635,83 @@ export class ProductService {
         return false;
     }
 
+    async getSelectedProductMetadata(id: number) : Promise<SelectedUpdateProductMetaData>{
+        const count = await this.countProductDetails(id);
+        if(count > 0) {
+            const temp = await this.productDetailsModel.findOne({
+                where: {
+                    id: id
+                }
+            })
 
-    async deleteMetaDataForProduct(productId: number, productDetailId: number) : Promise<boolean> {
+            const colors = await this.colorService.findAll();
+
+            const result: SelectedUpdateProductMetaData = {
+                id: id,
+                colorId: temp.color_id,
+                quantity: temp.quantity,
+                colorList: colors
+            }
+
+            return result;
+        }
+        return null; 
+    }
+
+    async countProductDetails(id: number) {
+        return await this.productDetailsModel.count({
+            where: {
+                id: id
+            }
+        })
+    }
+
+    async updateMetaDataForProduct(productDetailsId: number, colorId: number, quantity: number) : Promise<boolean> {
+        try {
+            const count = await this.countProductDetails(productDetailsId);
+            if(count > 0) {
+                const result = await this.productDetailsModel.update({
+                    color_id: colorId,
+                    quantity: quantity
+                }, {
+                    where: {
+                        id: productDetailsId
+                    }
+                });
+                return true;
+            }
+            
+        } catch (error) {
+            console.log(error);
+        }
+        return false;
+    }
+
+
+    async deleteMetaDataForProduct(productId: number, productDetailId: number): Promise<boolean> {
         const checkDetailsFromOrder = await this.orderService.checkProductDetailExistInOrder(productDetailId);
-        const countMetaData = await this.productDetailsModel.count({where: {
-            product_id: productId
-        }});
-        if(countMetaData > 1 && checkDetailsFromOrder == false) {
+        const countMetaData = await this.productDetailsModel.count({
+            where: {
+                product_id: productId
+            }
+        });
+        if (countMetaData > 1 && checkDetailsFromOrder == false) {
             try {
-                const result = await this.productDetailsModel.destroy({where: {
-                    id: productDetailId
-                }});
+                const result = await this.productDetailsModel.destroy({
+                    where: {
+                        id: productDetailId
+                    }
+                });
                 return result > 0;
             } catch (error) {
                 return false;
             }
-        } 
+        }
 
         return false;
     }
 
-    async findProductsByName(searchStr: string) : Promise<Product[]> {
+    async findProductsByName(searchStr: string): Promise<Product[]> {
         const result = await this.productModel.findAll({
             include: [
                 {
@@ -681,11 +738,11 @@ export class ProductService {
         return result;
     }
 
-    async searchProductByName(searchStr: string) : Promise<HomeProductDTO[]> {
+    async searchProductByName(searchStr: string): Promise<HomeProductDTO[]> {
         let result: HomeProductDTO[] = [];
         const products = await this.findProductsByName(searchStr);
 
-        for(const p of Object.values(products)) {
+        for (const p of Object.values(products)) {
             const dto: HomeProductDTO = {
                 id: p.id,
                 name: p.name,
