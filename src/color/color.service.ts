@@ -3,12 +3,15 @@ import { InjectModel } from '@nestjs/sequelize';
 import { where } from 'sequelize';
 import { Sequelize } from 'sequelize-typescript';
 import { Color } from 'src/models/color.model';
+import { ProductDetails } from 'src/models/productdetails.model';
 
 @Injectable()
 export class ColorService {
     constructor(
         @InjectModel(Color)
         private colorModel: typeof Color,
+        @InjectModel(ProductDetails)
+        private productDetails: typeof ProductDetails,
         private sequelize: Sequelize
     ) { }
 
@@ -50,5 +53,28 @@ export class ColorService {
         } catch (error) {
             return null;
         }
+    }
+
+    async deleteColorById(id: number) : Promise<boolean> {
+        let result = false;
+        try {
+            const count = await this.productDetails.count({where : {
+                color_id: id
+            }});
+
+            if(count > 0) {
+                result = false;
+            } else {
+                await this.colorModel.destroy({where: {
+                    id: id
+                }});
+                result = true;
+            }
+
+        } catch (error) {
+            console.log(error);
+            result = false;
+        }
+        return result;
     }
 }
