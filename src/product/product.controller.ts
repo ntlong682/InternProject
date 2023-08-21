@@ -351,6 +351,12 @@ export class ProductController {
 
     }
 
+    @UseGuards(AuthGuard)
+    @Put('update-product-metadata')
+    async updateProductMetaData() {
+
+    }
+
     @Post('search')
     async searchProduct(@Query('searchString') searchStr: string) {
         const result = await this.productService.searchProductByName(searchStr);
@@ -358,11 +364,6 @@ export class ProductController {
         return result;
     }
 
-    // @UseGuards(AuthGuard)
-    // @Put('update-product-metadata')
-    // async updateProductMetaData() {
-
-    // }
 
     @Get('home')
     async getListProductHomePage(): Promise<{ status, message, data }> {

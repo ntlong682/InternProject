@@ -428,7 +428,9 @@ export class ProductService {
                 screen: p.productDetails[0].screen,
                 ram: p.productDetails[0].ram,
                 rom: p.productDetails[0].rom,
-                weight: p.productDetails[0].weight
+                weight: p.productDetails[0].weight,
+                quantity: p.productDetails[0].quantity,
+                defaultProductDetailsId: p.productDetails[0].id
             }
             products.push(temp);
         }
@@ -447,7 +449,9 @@ export class ProductService {
                     screen: p.productDetails[0].screen,
                     ram: p.productDetails[0].ram,
                     rom: p.productDetails[0].rom,
-                    weight: p.productDetails[0].weight
+                    weight: p.productDetails[0].weight,
+                    quantity: p.productDetails[0].quantity,
+                    defaultProductDetailsId: p.productDetails[0].id
                 }
                 temps.push(temp);
             }
@@ -692,7 +696,9 @@ export class ProductService {
                 screen: p.productDetails[0].screen,
                 ram: p.productDetails[0].ram,
                 rom: p.productDetails[0].rom,
-                weight: p.productDetails[0].weight
+                weight: p.productDetails[0].weight,
+                quantity: p.productDetails[0].quantity,
+                defaultProductDetailsId: p.productDetails[0].id
             }
 
             result.push(dto);

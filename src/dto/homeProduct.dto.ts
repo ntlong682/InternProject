@@ -9,5 +9,7 @@ export class HomeProductDTO {
     ram: number;
     rom: number;
     weight: number;
+    quantity: number;
+    defaultProductDetailsId: number
     
 }
