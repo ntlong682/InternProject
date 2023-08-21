@@ -318,17 +318,7 @@ export class ProductController {
     @Post('add-product-metadata')
     async addProductMetadata(@Body() body: AddProductMetaData): Promise<{ status, message }> {
         const result = await this.productService.addMetaDataForProduct(body);
-        if (result == true) {
-            return {
-                status: true.valueOf(),
-                message: 'Thêm thông tin sản phẩm thành công'
-            }
-        } else {
-            return {
-                status: false.valueOf(),
-                message: 'Thêm thông tin sản phẩm thất bại'
-            }
-        }
+        return result;
     }
 
     @UseGuards(AuthGuard)

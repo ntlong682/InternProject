@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Post, Body } from '@nestjs/common';
+import { Controller, Get, UseGuards, Post, Body, Query } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { CustomerOrderDTO } from 'src/dto/customerOrder.dto';
@@ -29,6 +29,10 @@ export class OrderController {
         }
     }
 
+    @Get('order-details')
+    async getOrderDetailsForAdmin(@Query('orderId') id: number) {
+        
+    }
 
     // @UseGuards(AuthGuard)
     @Post('paynow')

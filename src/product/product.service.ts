@@ -608,31 +608,61 @@ export class ProductService {
         return this.colorService.findAll();
     }
 
-    // async updateProductDetail(product: Product) {
+    async checkColorExistInDetails(colorId: number, productId: number) {
+        const count = await this.productDetailsModel.count({
+            where: {
+                product_id: productId,
+                color_id: colorId
+            }
+        })
 
-    // }
+        return count > 0;
+    }
 
     async addMetaDataForProduct(data: AddProductMetaData): Promise<any> {
         const product = await this.findProductDataById(data.id);
         if (product != null) {
             const checkColor = await this.colorService.checkColorExist(data.color);
+            const checkColorExistInProduct = await this.checkColorExistInDetails(data.color, data.id);
             if (checkColor == true) {
-                const flag = await this.createProductDetails(product.productDetails[0].cpuName,
-                    product.productDetails[0].screen,
-                    product.productDetails[0].ram,
-                    product.productDetails[0].rom,
-                    product.productDetails[0].weight,
-                    data.color,
-                    data.quantity,
-                    product.id);
-                if (flag == true) {
-                    return true;
+                if(checkColorExistInProduct == true) {
+                    return {
+                        status: false.valueOf(),
+                        message: 'Color Existed'
+                    }
                 } else {
-                    return false;
+                    const flag = await this.createProductDetails(product.productDetails[0].cpuName,
+                        product.productDetails[0].screen,
+                        product.productDetails[0].ram,
+                        product.productDetails[0].rom,
+                        product.productDetails[0].weight,
+                        data.color,
+                        data.quantity,
+                        product.id);
+                    if (flag == true) {
+                        return {
+                            status: true.valueOf(),
+                            message: 'Success'
+                        }
+                    } else {
+                        return {
+                            status: false.valueOf(),
+                            message: 'Error'
+                        }
+                    }
+                }
+            } else {
+                return {
+                    status: false.valueOf(),
+                    message: 'Color Invalid'
                 }
             }
+        } else {
+            return {
+                status: false.valueOf(),
+                message: 'Id Invalid'
+            }
         }
-        return false;
     }
 
     async getSelectedProductMetadata(id: number) : Promise<SelectedUpdateProductMetaData>{
