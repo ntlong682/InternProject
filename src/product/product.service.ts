@@ -75,7 +75,7 @@ export class ProductService {
                 color_id: colorId,
                 quantity: quantity,
             });
-            console.log(result);
+            // console.log(result);
             return true;
         } catch (error) {
             console.log(error);

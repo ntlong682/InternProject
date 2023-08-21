@@ -6,11 +6,13 @@ import { Order } from 'src/models/order.model';
 import { OrderDetails } from 'src/models/orderdetails.model';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { JwtService } from '@nestjs/jwt';
+import { UserService } from 'src/user/user.service';
+import { User } from 'src/models/user.model';
 
 
 @Module({
-    imports: [SequelizeModule.forFeature([Order, OrderDetails])],
-    providers: [OrderService, AuthGuard, JwtService],
+    imports: [SequelizeModule.forFeature([Order, OrderDetails, User])],
+    providers: [OrderService, AuthGuard, JwtService, UserService],
     controllers: [OrderController]
 })
 export class OrderModule {

@@ -15,9 +15,11 @@ import { JwtService } from "@nestjs/jwt";
 import { OrderService } from "src/order/order.service";
 import { Order } from "src/models/order.model";
 import { OrderDetails } from "src/models/orderdetails.model";
+import { User } from "src/models/user.model";
+import { UserService } from "src/user/user.service";
 @Module({
-    imports: [SequelizeModule.forFeature([Product, ProductDetails, Categories, Color, Image, Order, OrderDetails])],
-    providers: [ProductService, CategoriesService, ColorService, ImageService, OrderService, AuthGuard, JwtService],
+    imports: [SequelizeModule.forFeature([Product, ProductDetails, Categories, Color, Image, Order, OrderDetails, User])],
+    providers: [ProductService, CategoriesService, ColorService, ImageService, OrderService, AuthGuard, JwtService, UserService],
     controllers: [ProductController],
     exports: [ProductService]
 })

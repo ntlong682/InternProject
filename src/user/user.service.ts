@@ -4,7 +4,6 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Sequelize } from 'sequelize-typescript';
 import { User } from 'src/models/user.model';
 import * as bcrypt from 'bcrypt';
-import { use } from 'passport';
 
 @Injectable()
 export class UserService {
