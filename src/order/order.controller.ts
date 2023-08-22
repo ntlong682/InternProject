@@ -1,3 +1,4 @@
+import { Put } from '@nestjs/common';
 import { Controller, Get, UseGuards, Post, Body, Query } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -55,5 +56,24 @@ export class OrderController {
                 message: "Thêm đơn hàng thất bại"
             }
         }
+    }
+
+    @UseGuards(AuthGuard)
+    @Put('change-status')
+    async changeOrderStatus(@Query('orderId') orderId: number, @Query('status') status: boolean)
+    : Promise<{status, message}> {
+        const result = await this.orderService.changeStatusOfOrder(orderId, status);
+        if(result == true) {
+            return {
+                status: true.valueOf(),
+                message: 'Update trạng thái thành công'
+            }
+        } else {
+            return {
+                status: false.valueOf(),
+                message: 'Update trạng thái thất bại'
+            }
+        }
+        
     }
 }

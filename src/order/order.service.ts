@@ -1,16 +1,23 @@
 import { InjectModel } from "@nestjs/sequelize";
+import { Sequelize } from "sequelize-typescript";
 import { CustomerOrderDTO } from "src/dto/customerOrder.dto";
 import { Order } from "src/models/order.model";
 import { OrderDetails } from "src/models/orderdetails.model";
+import { ProductDetails } from "src/models/productdetails.model";
 import { UserService } from "src/user/user.service";
+import { Injectable } from "@nestjs/common";
 
+@Injectable()
 export class OrderService {
     constructor(
         @InjectModel(Order)
         private orderModel: typeof Order,
         @InjectModel(OrderDetails)
         private orderDetailsModel: typeof OrderDetails,
-        private readonly userService: UserService
+        @InjectModel(ProductDetails)
+        private productDetailsModel: typeof ProductDetails,
+        private readonly userService: UserService,
+        private sequelize: Sequelize,
     ) { }
 
     async checkProductExistInOrder(productId: number): Promise<boolean> {
@@ -57,6 +64,107 @@ export class OrderService {
         } else {
             return null;
         }
+    }
+
+    async plusQuantity(productDetailsId: number, quantity: number,
+        productDetailsModel: typeof ProductDetails) {
+        const tempDetails = await productDetailsModel.findOne({
+            where: {
+                id: productDetailsId
+            }
+        });
+
+        if (tempDetails.quantity + quantity > 0) {
+            await productDetailsModel.update({
+                quantity: tempDetails.quantity + quantity
+            }, {
+                where: {
+                    id: productDetailsId
+                }
+            });
+        } else {
+            throw new Error('Add stock invalid at: ' + productDetailsId);
+        }
+
+    }
+
+    async minusQuantity(productDetailsId: number, quantity: number,
+        productDetailsModel: typeof ProductDetails) {
+        const tempDetails = await productDetailsModel.findOne({
+            where: {
+                id: productDetailsId
+            }
+        });
+        if (tempDetails.quantity >= quantity) {
+            await productDetailsModel.update({
+                quantity: tempDetails.quantity - quantity
+            }, {
+                where: {
+                    id: productDetailsId
+                }
+            });
+        } else {
+            throw new Error('Product out of stock at: ' + productDetailsId);
+        }
+    }
+
+    async changeQuantityOfProduct(callback, orderId: number,
+        productDetailsModel: typeof ProductDetails): Promise<boolean> {
+        const orderDetails = await this.orderDetailsModel.findAll({
+            where: {
+                order_id: orderId
+            }
+        });
+
+        const transaction = await this.sequelize.transaction();
+        try {
+            for (const od of Object.values(orderDetails)) {
+                await callback(od.productDetails_id, od.quantity, productDetailsModel);
+            }
+            await transaction.commit();
+            return true;
+        } catch (error) {
+            await transaction.rollback();
+            console.log("Transaction rollback: " + error);
+        }
+        return false;
+    }
+
+    async checkOrderExist(orderId: number): Promise<boolean> {
+        const count = await this.orderModel.count({
+            where: {
+                id: orderId
+            }
+        })
+
+        return count > 0;
+    }
+
+    async changeStatusOfOrder(orderId: number, newStatus: boolean): Promise<boolean> {
+        let flag = false;
+        const checkOrderExist = await this.checkOrderExist(orderId);
+        if (checkOrderExist == true) {
+            let checkUpdateQuantity: boolean;
+            if (newStatus == true) {
+                checkUpdateQuantity = await this.changeQuantityOfProduct(this.minusQuantity, orderId, this.productDetailsModel);
+            } else {
+                checkUpdateQuantity = await this.changeQuantityOfProduct(this.plusQuantity, orderId, this.productDetailsModel);
+            }
+
+            if (checkUpdateQuantity == true) {
+                await this.orderModel.update({
+                    orderState: newStatus
+                }, {
+                    where: {
+                        id: orderId
+                    }
+                })
+
+                flag = true;
+            }
+        }
+
+        return flag;
     }
 
     async createOrderForUser(customerOrder: CustomerOrderDTO): Promise<boolean> {
