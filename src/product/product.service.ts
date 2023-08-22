@@ -625,7 +625,7 @@ export class ProductService {
             const checkColor = await this.colorService.checkColorExist(data.color);
             const checkColorExistInProduct = await this.checkColorExistInDetails(data.color, data.id);
             if (checkColor == true) {
-                if(checkColorExistInProduct == true) {
+                if (checkColorExistInProduct == true) {
                     return {
                         status: false.valueOf(),
                         message: 'Color Existed'
@@ -665,9 +665,9 @@ export class ProductService {
         }
     }
 
-    async getSelectedProductMetadata(id: number) : Promise<SelectedUpdateProductMetaData>{
+    async getSelectedProductMetadata(id: number): Promise<SelectedUpdateProductMetaData> {
         const count = await this.countProductDetails(id);
-        if(count > 0) {
+        if (count > 0) {
             const temp = await this.productDetailsModel.findOne({
                 where: {
                     id: id
@@ -685,7 +685,7 @@ export class ProductService {
 
             return result;
         }
-        return null; 
+        return null;
     }
 
     async countProductDetails(id: number) {
@@ -696,21 +696,38 @@ export class ProductService {
         })
     }
 
-    async updateMetaDataForProduct(productDetailsId: number, colorId: number, quantity: number) : Promise<boolean> {
+    async updateMetaDataForProduct(productDetailsId: number, colorId: number, quantity: number)
+    : Promise<boolean> {
         try {
             const count = await this.countProductDetails(productDetailsId);
-            if(count > 0) {
-                const result = await this.productDetailsModel.update({
+            const p = await this.productDetailsModel.findOne({
+                where: {
+                    id: productDetailsId
+                }
+            })
+            const countColor = await this.productDetailsModel.count({
+                where: {
                     color_id: colorId,
-                    quantity: quantity
-                }, {
-                    where: {
-                        id: productDetailsId
-                    }
-                });
-                return true;
+                    product_id: p.product_id
+                }
+            })
+            if (countColor == 0) {
+                if (count > 0) {
+                    const result = await this.productDetailsModel.update({
+                        color_id: colorId,
+                        quantity: quantity
+                    }, {
+                        where: {
+                            id: productDetailsId
+                        }
+                    });
+                    return true;
+                }
+            } else {
+                return false;
             }
-            
+
+
         } catch (error) {
             console.log(error);
         }

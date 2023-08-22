@@ -375,7 +375,7 @@ export class ProductController {
             }
         } else {
             return {
-                status: true.valueOf(),
+                status: false.valueOf(),
                 message: 'Cập nhật thông tin chi tiết sản phẩm thất bại'
             }
         }
