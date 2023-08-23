@@ -222,7 +222,7 @@ export class ProductController {
     // @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
     async updateProduct(@UploadedFiles() files: { coverImage?: Express.Multer.File[], Images?: Express.Multer.File[] },
         @Body() body: UpdateSelectedProductDTO): Promise<{ status, message }> {
- 
+
         let flag = true;
         let messageError = "";
 
@@ -230,6 +230,12 @@ export class ProductController {
         if (files.coverImage == null && body.deletedCoverImg.length > 0) {
             flag = false;
             messageError += 'If you delete cover image, you must add a new one. ';
+        }
+
+        //Check xem nếu người dùng add cover img mới thì phải xóa cover img cũ đi
+        if(files.coverImage != null && body.deletedCoverImg.length == 0) {
+            flag = false;
+            messageError += 'If you want to add new cover image, you must delete the old one. ';
         }
 
         //Check xem nếu người dùng xóa hết ảnh của sản phẩm thì phải add ít nhất 1 ảnh mới
@@ -260,15 +266,19 @@ export class ProductController {
                         throw messageError;
                     } else {
                         //Delete selected image by user.
-                        await this.imageService.deleteImageByUrl(body.deletedCoverImg);
-                        await this.productService.deleteLocalFile(body.deletedCoverImg);
+                        if (body.deletedCoverImg != "") {
+                            await this.imageService.deleteImageByUrl(body.deletedCoverImg);
+                            await this.productService.deleteLocalFile(body.deletedCoverImg);
+                        }
 
                         for (const url of Object.values(deletedImgList)) {
-                            await this.imageService.deleteImageByUrl(url);
-                            await this.productService.deleteLocalFile(url);
+                            if (url != "") {
+                                await this.imageService.deleteImageByUrl(url);
+                                await this.productService.deleteLocalFile(url);
+                            }
                         }
-                        
-                        transaction.commit();
+
+                        await transaction.commit();
                     }
                 } else {
                     flag = false;
@@ -278,7 +288,7 @@ export class ProductController {
             } catch (error) {
                 flag = false;
                 console.log("Transaction rollback: " + error);
-                transaction.rollback();
+                await transaction.rollback();
             }
         }
         if (flag == true) {
