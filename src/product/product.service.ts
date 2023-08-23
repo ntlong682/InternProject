@@ -87,21 +87,40 @@ export class ProductService {
     async saveProductsImage(@UploadedFiles() files: { coverImage?: Express.Multer.File[], Images?: Express.Multer.File[] }, productId: number): Promise<boolean> {
         // console.log(files);
         let flag = true;
-        files.coverImage.forEach(file => {
-            const imgPath = file.path;
-            console.log(file.originalname);
-            const imgName = `Cover${file.originalname}`;
-            if (!this.imageService.addImage(imgName, imgPath, productId)) {
-                flag = false;
+        if (files.coverImage != null) {
+            for (const file of Object.values(files.coverImage)) {
+                const imgPath = file.path;
+                console.log(file.originalname);
+                const imgName = `Cover${file.originalname}`;
+                if (await !this.imageService.addImage(imgName, imgPath, productId)) {
+                    flag = false;
+                }
             }
-        });
-        files.Images.forEach(file => {
-            const imgPath = file.path;
-            const imgName = file.originalname;
-            if (!this.imageService.addImage(imgName, imgPath, productId)) {
-                flag = false;
+        }
+        // files.coverImage.forEach(file => {
+        //     const imgPath = file.path;
+        //     console.log(file.originalname);
+        //     const imgName = `Cover${file.originalname}`;
+        //     if (!this.imageService.addImage(imgName, imgPath, productId)) {
+        //         flag = false;
+        //     }
+        // });
+        if (files.Images != null) {
+            for (const file of Object.values(files.Images)) {
+                const imgPath = file.path;
+                const imgName = file.originalname;
+                if (await !this.imageService.addImage(imgName, imgPath, productId)) {
+                    flag = false;
+                }
             }
-        });
+        }
+        // files.Images.forEach(file => {
+        //     const imgPath = file.path;
+        //     const imgName = file.originalname;
+        //     if (!this.imageService.addImage(imgName, imgPath, productId)) {
+        //         flag = false;
+        //     }
+        // });
         if (flag == true) {
             return true;
         } else {
@@ -697,7 +716,7 @@ export class ProductService {
     }
 
     async updateMetaDataForProduct(productDetailsId: number, colorId: number, quantity: number)
-    : Promise<boolean> {
+        : Promise<boolean> {
         try {
             const count = await this.countProductDetails(productDetailsId);
             const p = await this.productDetailsModel.findOne({

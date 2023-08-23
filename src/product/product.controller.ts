@@ -11,6 +11,7 @@ import { CategoriesService } from "src/categories/categories.service";
 import { UpdateSelectedProductDTO } from "src/dto/updateSelectedProduct";
 import { validate } from "class-validator";
 import { AddProductMetaData } from "src/dto/addProductMetaData.dto";
+import { Sequelize } from "sequelize-typescript";
 
 @Controller('product')
 export class ProductController {
@@ -19,6 +20,7 @@ export class ProductController {
         private readonly imageService: ImageService,
         private readonly colorService: ColorService,
         private readonly categoriesService: CategoriesService,
+        private sequelize: Sequelize
     ) { }
 
     // imageFileFilter = (req, file, callback) => {
@@ -220,48 +222,65 @@ export class ProductController {
     // @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
     async updateProduct(@UploadedFiles() files: { coverImage?: Express.Multer.File[], Images?: Express.Multer.File[] },
         @Body() body: UpdateSelectedProductDTO): Promise<{ status, message }> {
-        // const validationError = await validate(body);
-        // await this.saveFileToLocal(files);    
+ 
         let flag = true;
-        if (files.coverImage == null || files.coverImage.length == 0) {
+        let messageError = "";
+
+        //Check xem nếu người dùng xóa cover img thì phải add cover img mới
+        if (files.coverImage == null && body.deletedCoverImg.length > 0) {
             flag = false;
+            messageError += 'If you delete cover image, you must add a new one. ';
         }
-        if (files.Images == null || files.Images.length == 0) {
+
+        //Check xem nếu người dùng xóa hết ảnh của sản phẩm thì phải add ít nhất 1 ảnh mới
+        const deletedImgList: string[] = body.deletedImgUrl.split("||");
+        const countProductImg = await this.imageService.countImgInProduct(body.id);
+        if (files.Images == null && deletedImgList.length - 1 == countProductImg) {
             flag = false;
+            messageError += 'If you delete all image, you must add atlease a new one. ';
         }
+
+        //Check category tồn tại hay ko
         if (await this.categoriesService.checkCategoryId(body.categoryId) == false) {
             flag = false;
         }
         if (flag == true) {
-            const product = await this.productService.findProductById(body.id);
-            // console.log(product);
-            const imgList = await this.imageService.findAllImgByProductId(body.id);
-            // console.log(imgList);
+            //Dùng transaction để rollback nếu có lỗi
+            const transaction = await this.sequelize.transaction();
+            try {
+                //Check product tồn tại hay ko và lưu ảnh của product vào db thành công hay ko
+                const product = await this.productService.findProductById(body.id);
+                const saveProductImgSuccess = await this.productService.saveProductsImage(files, body.id);
+                if (product != null && saveProductImgSuccess == true) {
+                    //Update product
+                    const update = await this.productService.updateProduct(body);
+                    if (update != true) {
+                        flag = false;
+                        messageError += "Cập nhật thất bại. ";
+                        throw messageError;
+                    } else {
+                        //Delete selected image by user.
+                        await this.imageService.deleteImageByUrl(body.deletedCoverImg);
+                        await this.productService.deleteLocalFile(body.deletedCoverImg);
 
-            await this.imageService.deleteImageByProductId(body.id);
-
-            const saveProductImgSuccess = await this.productService.saveProductsImage(files, body.id);
-            if (product != null && saveProductImgSuccess == true) {
-                const update = await this.productService.updateProduct(body);
-                if (update != true) {
-                    flag = false;
+                        for (const url of Object.values(deletedImgList)) {
+                            await this.imageService.deleteImageByUrl(url);
+                            await this.productService.deleteLocalFile(url);
+                        }
+                        
+                        transaction.commit();
+                    }
                 } else {
-                    imgList.forEach(async img => {
-                        await this.productService.deleteLocalFile(img.imgUrl);
-                    });
+                    flag = false;
+                    messageError += "Cập nhật thất bại. ";
+                    throw messageError;
                 }
-            } else {
+            } catch (error) {
                 flag = false;
-            }
-            if (flag == false) {
-                imgList.forEach(async img => {
-                    await this.imageService.addImage(img.imgName, img.imgUrl, img.product_id);
-                });
+                console.log("Transaction rollback: " + error);
+                transaction.rollback();
             }
         }
-        // console.log(flag);
-
-
         if (flag == true) {
             return {
                 status: true.valueOf(),
@@ -271,7 +290,7 @@ export class ProductController {
             await this.productService.deleteLocalProductImageError(files);
             return {
                 status: false.valueOf(),
-                message: 'Update sản phẩm thất bại'
+                message: messageError
             }
         }
     }
@@ -343,10 +362,10 @@ export class ProductController {
 
     @UseGuards(AuthGuard)
     @Get('update-product-metadata')
-    async getUpdateProductMetaData(@Query('id') id: number) : Promise<{status, message, data}>{
+    async getUpdateProductMetaData(@Query('id') id: number): Promise<{ status, message, data }> {
         const result = await this.productService.getSelectedProductMetadata(id);
 
-        if(result != null) {
+        if (result != null) {
             return {
                 status: true.valueOf(),
                 message: 'Load data thành công',

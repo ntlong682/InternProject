@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
+import { Op } from 'sequelize';
 import { Sequelize } from 'sequelize-typescript';
 import { Image } from 'src/models/image.model';
 @Injectable()
@@ -70,4 +71,28 @@ export class ImageService {
         }
 
     }
+
+    async deleteImageByUrl(url: string) {
+        try {
+            await this.imageModel.destroy({
+                where: {
+                    imgUrl: url
+                }
+            })
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async countImgInProduct(productId: number) : Promise<number> {
+        return await this.imageModel.count({
+            where: {
+                product_id: productId,
+                imgName: {
+                    [Op.notLike]: 'Cover%'
+                }
+            }
+        })
+    }
+
 }

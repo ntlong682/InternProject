@@ -41,6 +41,12 @@ export class UpdateSelectedProductDTO {
     @IsNumberString()
     weight: number
 
+
+    @IsString()
+    deletedCoverImg: string
+
+    @IsString()
+    deletedImgUrl: string
     // @IsNotEmpty()
     // @IsNumberString()
     // colorId: number
