@@ -233,7 +233,7 @@ export class ProductController {
         }
 
         //Check xem nếu người dùng add cover img mới thì phải xóa cover img cũ đi
-        if(files.coverImage != null && body.deletedCoverImg.length == 0) {
+        if (files.coverImage != null && body.deletedCoverImg.length == 0) {
             flag = false;
             messageError += 'If you want to add new cover image, you must delete the old one. ';
         }
@@ -427,5 +427,26 @@ export class ProductController {
             message: 'Lấy sản phẩm thành công',
             data: data
         }
+    }
+
+
+    @Get('product-details')
+    async getProductDetailsForCustomer(@Query('id') productId: number)
+        : Promise<{ status, message, data }> {
+        const result = await this.productService.getAvaiableProductDetailsByProductId(+productId);
+        if (result != null) {
+            return {
+                status: true.valueOf(),
+                message: 'Load thông tin sản phẩm thành công',
+                data: result
+            }
+        } else {
+            return {
+                status: false.valueOf(),
+                message: 'Load thông tin sản phẩm thất bại',
+                data: null
+            }
+        }
+
     }
 }

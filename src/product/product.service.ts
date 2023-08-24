@@ -831,4 +831,81 @@ export class ProductService {
         return result;
     }
 
+    async findAvaiableProductDataById(productId: number): Promise<Product> {
+        const product = await this.productModel.findOne({
+            include: [
+                {
+                    model: Categories
+                },
+                {
+                    model: Image
+                },
+                {
+                    model: ProductDetails,
+                    include: [Color],
+                    where: {
+                        quantity: {
+                            [Op.gt]: 0
+                        }
+                    }
+                }
+            ], where: {
+                id: productId
+            }
+        })
+        // console.log(product);
+
+        return product;
+    }
+
+    async getAvaiableProductDetailsByProductId(productId: number): Promise<ViewProductDetailDTO> {
+        const product = await this.findAvaiableProductDataById(productId);
+        if (product != null) {
+            let metaDatas: ProductMetaDataDTO[] = [];
+            let totalQuantity = 0
+            for (const pd of Object.values(product.productDetails)) {
+                let metaData: ProductMetaDataDTO = {
+                    productDetailId: pd.id,
+                    colorId: pd.color_id,
+                    colorName: pd.color.name,
+                    quantity: pd.quantity
+                }
+                totalQuantity += pd.quantity;
+                metaDatas.push(metaData);
+            }
+            let coverImg: string;
+            let imgList: string[] = [];
+            for (const img of Object.values(product.imgList)) {
+                if (img.imgName.startsWith('Cover') == true) {
+                    coverImg = img.imgUrl;
+                } else {
+                    imgList.push(img.imgUrl);
+                }
+            }
+
+            let productDetailDTO: ViewProductDetailDTO = {
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                oldPrice: product.oldPrice,
+                categoryName: product.category.categoryName,
+                cpuName: product.productDetails[0].cpuName,
+                screen: product.productDetails[0].screen,
+                ram: product.productDetails[0].ram,
+                rom: product.productDetails[0].rom,
+                weight: product.productDetails[0].weight,
+                totalQuantity: totalQuantity,
+                coverImg: coverImg,
+                imagesList: imgList,
+                metaData: metaDatas
+            }
+
+
+            return productDetailDTO;
+        } else {
+            return null;
+        }
+
+    }
+
 }
