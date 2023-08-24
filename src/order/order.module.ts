@@ -10,9 +10,10 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
 import { User } from 'src/models/user.model';
 import { ProductDetails } from 'src/models/productdetails.model';
+import { Product } from 'src/models/product.model';
 
 @Module({
-    imports: [SequelizeModule.forFeature([Order, OrderDetails, ProductDetails, User])
+    imports: [SequelizeModule.forFeature([Order, OrderDetails, Product, ProductDetails, User])
         , UserModule, JwtModule],
     providers: [OrderService, AuthGuard, JwtService, UserService],
     controllers: [OrderController],

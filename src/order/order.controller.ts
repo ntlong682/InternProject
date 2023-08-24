@@ -30,10 +30,24 @@ export class OrderController {
         }
     }
 
+    @UseGuards(AuthGuard)
     @Get('order-details')
-    async getOrderDetailsForAdmin(@Query('orderId') id: number) {
-        
-    }
+    async getOrderDetailsForAdmin(@Query('orderId') id: number): Promise<{ status, message, data }> {
+        const result = await this.orderService.getListOrderDetailsForAdmin(id);
+        if(result != null) {
+            return {
+                status: true.valueOf(),
+                message: "Load chi tiết đơn hàng thành công",
+                data: result
+            }
+        } else {
+            return {
+                status: false.valueOf(),
+                message: "Load chi tiết đơn hàng thất bại",
+                data: null
+            }
+        }
+    }   
 
     // @UseGuards(AuthGuard)
     @Post('paynow')
@@ -61,9 +75,9 @@ export class OrderController {
     @UseGuards(AuthGuard)
     @Put('change-status')
     async changeOrderStatus(@Query('orderId') orderId: number, @Query('status') status: boolean)
-    : Promise<{status, message}> {
+        : Promise<{ status, message }> {
         const result = await this.orderService.changeStatusOfOrder(orderId, status);
-        if(result == true) {
+        if (result == true) {
             return {
                 status: true.valueOf(),
                 message: 'Update trạng thái thành công'
@@ -74,6 +88,6 @@ export class OrderController {
                 message: 'Update trạng thái thất bại'
             }
         }
-        
+
     }
 }

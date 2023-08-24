@@ -6,6 +6,12 @@ import { OrderDetails } from "src/models/orderdetails.model";
 import { ProductDetails } from "src/models/productdetails.model";
 import { UserService } from "src/user/user.service";
 import { Injectable } from "@nestjs/common";
+import { OrderDetailsDTO } from "src/dto/orderDetails.dto";
+import { User } from "src/models/user.model";
+import { OrderDetailMetaDataDTO } from "src/dto/orderDetailMetadata.dto";
+import { Product } from "src/models/product.model";
+import { Image } from "src/models/image.model";
+import { Op } from "sequelize";
 
 @Injectable()
 export class OrderService {
@@ -14,8 +20,12 @@ export class OrderService {
         private orderModel: typeof Order,
         @InjectModel(OrderDetails)
         private orderDetailsModel: typeof OrderDetails,
+        @InjectModel(Product)
+        private productModel: typeof Product,
         @InjectModel(ProductDetails)
         private productDetailsModel: typeof ProductDetails,
+        @InjectModel(User)
+        private userModel: typeof User,
         private readonly userService: UserService,
         private sequelize: Sequelize,
     ) { }
@@ -200,5 +210,73 @@ export class OrderService {
             ]
         });
         return result;
+    }
+
+    async getListOrderDetailByOrderId(orderId: number) {
+        return await this.orderDetailsModel.findAll({
+            where: {
+                order_id: orderId
+            }
+        });
+    }
+
+    async getListOrderDetailsForAdmin(orderId: number) : Promise<OrderDetailsDTO> {
+        const order = await this.orderModel.findOne({
+            where: {
+                id: orderId
+            }
+        })
+        if (order != null) {
+            const orderedUser = await this.userModel.findOne({
+                where: {
+                    id: order.user_id
+                }
+            });
+
+            const orderDetails = await this.getListOrderDetailByOrderId(orderId);
+            const orderMetaData: OrderDetailMetaDataDTO[] = [];
+            for (const od of orderDetails) {
+                const product = await this.productModel.findOne({
+                    include: [
+                        {
+                            model: Image,
+                            where: {
+                                imgName: {
+                                    [Op.startsWith]: "Cover"
+                                }
+                            }
+                        }, {
+                            model: ProductDetails
+                        }
+                    ], where: {
+                        id: od.product_id
+                    }
+                })
+
+                const tempMetaData: OrderDetailMetaDataDTO = {
+                    orderDetailId: od.id,
+                    productId: product.id,
+                    productDetailId: od.productDetails_id,
+                    coverImg: product.imgList[0].imgUrl,
+                    productName: product.name,
+                    quantity: od.quantity,
+                    price: od.price
+                }
+                orderMetaData.push(tempMetaData);
+            }
+
+            const orderDetailsDTO: OrderDetailsDTO = {
+                orderId: orderId,
+                userId: order.user_id,
+                userName: orderedUser.userName,
+                orderState: order.orderState,
+                orderDetails: orderMetaData,
+                totalPrice: order.totalPrice
+            }
+
+            // console.log(orderDetailsDTO);
+            return orderDetailsDTO;
+        }
+        return null;
     }
 }
