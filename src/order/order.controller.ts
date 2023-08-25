@@ -34,7 +34,7 @@ export class OrderController {
     @Get('order-details')
     async getOrderDetailsForAdmin(@Query('orderId') id: number): Promise<{ status, message, data }> {
         const result = await this.orderService.getListOrderDetailsForAdmin(id);
-        if(result != null) {
+        if (result != null) {
             return {
                 status: true.valueOf(),
                 message: "Load chi tiết đơn hàng thành công",
@@ -47,7 +47,7 @@ export class OrderController {
                 data: null
             }
         }
-    }   
+    }
 
     // @UseGuards(AuthGuard)
     @Post('paynow')
@@ -70,6 +70,26 @@ export class OrderController {
                 message: "Thêm đơn hàng thất bại"
             }
         }
+    }
+
+    @Get('history')
+    async getCustomerHistory(@Query('userId') userId: number)
+        : Promise<{ status, message, data }> {
+        const result = await this.orderService.listOrderForUser(userId);
+        if (result != null && result.length > 0) {
+            return {
+                status: true.valueOf(),
+                message: 'Load lịch sử mua hàng thành công',
+                data: result
+            }
+        } else {
+            return {
+                status: false.valueOf(),
+                message: 'Load lịch sử mua hàng thất bại',
+                data: null
+            }
+        }
+        
     }
 
     @UseGuards(AuthGuard)

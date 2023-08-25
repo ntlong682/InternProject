@@ -279,4 +279,21 @@ export class OrderService {
         }
         return null;
     }
+
+    async listOrderForUser(userId: number): Promise<Order[]> {
+        const result = await this.orderModel.findAll({
+            include: [
+                {
+                    model: OrderDetails
+                }
+            ],
+            order: [
+                ['createdAt', 'DESC']
+            ],
+            where: {
+                user_id: userId
+            }
+        });
+        return result;
+    }
 }
